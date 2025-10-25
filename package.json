@@ -1,0 +1,34 @@
+{
+  "name": "crowd-backend",
+  "version": "1.0.0",
+  "description": "Firebase backend for Crowd iOS app",
+  "main": "functions/index.js",
+  "scripts": {
+    "start": "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:$PATH\" && firebase emulators:start --project crowd-6193c",
+    "emulators": "./scripts/start-emulators.sh",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:firestore": "firebase deploy --only firestore",
+    "deploy:all": "firebase deploy",
+    "logs": "firebase functions:log",
+    "lint": "cd functions && npm run lint",
+    "test": "./scripts/test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tenbandz/Crowd-Backend"
+  },
+  "keywords": [
+    "firebase",
+    "cloud-functions",
+    "firestore",
+    "backend",
+    "crowd"
+  ],
+  "author": "Teni Owojori",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
+

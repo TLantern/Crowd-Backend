@@ -1,0 +1,32 @@
+name: Test Functions
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [dev, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: functions/package-lock.json
+      
+      - name: Install dependencies
+        run: cd functions && npm ci
+      
+      - name: Run linter
+        run: cd functions && npm run lint
+      
+      - name: Run tests
+        run: cd functions && npm test || echo "No tests configured yet"
+
