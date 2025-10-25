@@ -20,9 +20,20 @@ exports.createUser = functions.https.onCall(async (data, context) => {
     }
 
     const userId = context.auth.uid;
+    
+    // Validate interests if provided
+    if (data.interests && !Array.isArray(data.interests)) {
+      throw new functions.https.HttpsError('invalid-argument', 'Interests must be an array');
+    }
+    
+    if (data.interests && data.interests.some(interest => typeof interest !== 'string')) {
+      throw new functions.https.HttpsError('invalid-argument', 'All interests must be strings');
+    }
+    
     const userData = {
       id: userId,
       displayName: data.displayName || 'Anonymous',
+      interests: data.interests || [],
       auraPoints: 0,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -59,6 +70,17 @@ exports.updateUser = functions.https.onCall(async (data, context) => {
     }
 
     const userId = context.auth.uid;
+    
+    // Validate interests if provided
+    if (data.interests !== undefined) {
+      if (!Array.isArray(data.interests)) {
+        throw new functions.https.HttpsError('invalid-argument', 'Interests must be an array');
+      }
+      if (data.interests.some(interest => typeof interest !== 'string')) {
+        throw new functions.https.HttpsError('invalid-argument', 'All interests must be strings');
+      }
+    }
+    
     const updateData = {
       ...data,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
