@@ -4,15 +4,16 @@
   "description": "Firebase backend for Crowd iOS app",
   "main": "functions/index.js",
   "scripts": {
-    "start": "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:$PATH\" && firebase emulators:start --project crowd-6193c",
-    "emulators": "./scripts/start-emulators.sh",
-    "deploy": "./scripts/deploy.sh",
+    "start": "firebase emulators:start --project crowd-6193c",
+    "start:mac": "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:$PATH\" && firebase emulators:start --project crowd-6193c",
+    "emulators": "firebase emulators:start",
+    "deploy": "firebase deploy --only functions,firestore:rules,firestore:indexes",
     "deploy:functions": "firebase deploy --only functions",
-    "deploy:firestore": "firebase deploy --only firestore",
+    "deploy:firestore": "firebase deploy --only firestore:rules,firestore:indexes",
     "deploy:all": "firebase deploy",
     "logs": "firebase functions:log",
     "lint": "cd functions && npm run lint",
-    "test": "./scripts/test.sh"
+    "test": "node functions/test-geohash.js"
   },
   "repository": {
     "type": "git",

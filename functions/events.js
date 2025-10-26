@@ -5,6 +5,7 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const {encodeGeohash, getGeohashRange, calculateDistance} = require('./geohash');
 
 const db = admin.firestore();
 
@@ -22,12 +23,16 @@ exports.createEvent = functions.https.onCall(async (data, context) => {
     const hostId = context.auth.uid;
     const eventId = data.id || admin.firestore().collection('events').doc().id;
 
+    // Generate geohash from coordinates
+    const geohash = encodeGeohash(data.latitude, data.longitude, 6);
+
     const eventData = {
       id: eventId,
       title: data.title,
       hostId: hostId,
       latitude: data.latitude,
       longitude: data.longitude,
+      geohash: geohash,
       radiusMeters: data.radiusMeters || 60,
       startsAt: data.startsAt ? admin.firestore.Timestamp.fromDate(new Date(data.startsAt)) : null,
       endsAt: data.endsAt ? admin.firestore.Timestamp.fromDate(new Date(data.endsAt)) : null,
@@ -35,6 +40,7 @@ exports.createEvent = functions.https.onCall(async (data, context) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       signalStrength: 0,
       attendeeCount: 0,
+      peopleCount: 0,
       tags: data.tags || [],
     };
 
@@ -205,7 +211,7 @@ exports.getEvent = functions.https.onCall(async (data, context) => {
 });
 
 /**
- * Get events in a region
+ * Get events in a region (legacy bounding box approach)
  * HTTP endpoint: GET /getEventsInRegion
  */
 exports.getEventsInRegion = functions.https.onCall(async (data, context) => {
@@ -254,6 +260,73 @@ exports.getEventsInRegion = functions.https.onCall(async (data, context) => {
   } catch (error) {
     console.error('Error getting events in region:', error);
     throw new functions.https.HttpsError('internal', 'Failed to get events in region');
+  }
+});
+
+/**
+ * Get nearby events using geohash-based queries
+ * This is more efficient than the bounding box approach for spatial queries
+ * HTTP endpoint: POST /getNearbyEvents
+ */
+exports.getNearbyEvents = functions.https.onCall(async (data, context) => {
+  try {
+    // Verify user is authenticated
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+
+    const { latitude, longitude, radiusKm = 10 } = data;
+
+    if (!latitude || !longitude) {
+      throw new functions.https.HttpsError('invalid-argument', 'Latitude and longitude are required');
+    }
+
+    // Get geohash ranges that cover the search area
+    const geohashRanges = getGeohashRange(latitude, longitude, radiusKm);
+
+    console.log(`Searching for events near (${latitude}, ${longitude}) within ${radiusKm}km using geohashes: ${geohashRanges.join(', ')}`);
+
+    // Query events using geohash prefixes
+    const eventPromises = geohashRanges.map(async (geohashPrefix) => {
+      const snapshot = await db.collection('events')
+        .where('geohash', '>=', geohashPrefix)
+        .where('geohash', '<=', geohashPrefix + '\uf8ff')
+        .get();
+      return snapshot.docs.map(doc => doc.data());
+    });
+
+    const eventArrays = await Promise.all(eventPromises);
+    const allEvents = eventArrays.flat();
+
+    // Remove duplicates (events might appear in multiple geohash ranges)
+    const uniqueEvents = Array.from(
+      new Map(allEvents.map(event => [event.id, event])).values()
+    );
+
+    // Filter by exact distance and add distance field
+    const eventsWithDistance = uniqueEvents
+      .map(event => {
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          event.latitude,
+          event.longitude
+        );
+        return { ...event, distance };
+      })
+      .filter(event => event.distance <= radiusKm)
+      .sort((a, b) => a.distance - b.distance); // Sort by distance
+
+    console.log(`Found ${eventsWithDistance.length} events within ${radiusKm}km`);
+
+    return {
+      success: true,
+      events: eventsWithDistance,
+      count: eventsWithDistance.length,
+    };
+  } catch (error) {
+    console.error('Error getting nearby events:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to get nearby events');
   }
 });
 
@@ -347,22 +420,3 @@ exports.onEventDelete = functions.firestore
       console.error('Error in onEventDelete trigger:', error);
     }
   });
-
-/**
- * Helper function to calculate distance between two coordinates
- * @param {number} lat1 - First latitude
- * @param {number} lon1 - First longitude
- * @param {number} lat2 - Second latitude
- * @param {number} lon2 - Second longitude
- * @returns {number} Distance in kilometers
- */
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-}

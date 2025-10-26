@@ -28,7 +28,9 @@ service cloud.firestore {
              request.resource.data.longitude is number &&
              request.resource.data.radiusMeters is number &&
              request.resource.data.createdAt is timestamp &&
-             request.resource.data.updatedAt is timestamp;
+             request.resource.data.updatedAt is timestamp &&
+             (!('geohash' in request.resource.data) || request.resource.data.geohash is string) &&
+             (!('peopleCount' in request.resource.data) || request.resource.data.peopleCount is int);
     }
     
     function isValidSignalData() {
@@ -37,7 +39,13 @@ service cloud.firestore {
              request.resource.data.eventId is string &&
              request.resource.data.signalStrength is int &&
              request.resource.data.createdAt is timestamp &&
-             request.resource.data.updatedAt is timestamp;
+             request.resource.data.updatedAt is timestamp &&
+             (!('latitude' in request.resource.data) || request.resource.data.latitude is number) &&
+             (!('longitude' in request.resource.data) || request.resource.data.longitude is number) &&
+             (!('geohash' in request.resource.data) || request.resource.data.geohash is string) &&
+             (!('peopleCount' in request.resource.data) || request.resource.data.peopleCount is int) &&
+             (!('color' in request.resource.data) || request.resource.data.color is string) &&
+             (!('radiusMeters' in request.resource.data) || request.resource.data.radiusMeters is int);
     }
     
     function isValidPointData() {
