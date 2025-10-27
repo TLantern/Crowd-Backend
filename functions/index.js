@@ -15,6 +15,7 @@ const userFunctions = require('./users');
 const eventFunctions = require('./events');
 const signalFunctions = require('./signals');
 const pointFunctions = require('./points');
+const leaderboardFunctions = require('./leaderboard');
 
 // Export all functions
 module.exports = {
@@ -58,4 +59,8 @@ module.exports = {
   onPointCreate: pointFunctions.onPointCreate,
   onPointUpdate: pointFunctions.onPointUpdate,
   onPointDelete: pointFunctions.onPointDelete,
+
+  // Leaderboard functions
+  getLeaderboard: leaderboardFunctions.getLeaderboard,
+  getUserRank: leaderboardFunctions.getUserRank,
 };
