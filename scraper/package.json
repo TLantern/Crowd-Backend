@@ -1,0 +1,19 @@
+{
+    "name": "campus-events-pipeline",
+    "version": "1.0.0",
+    "description": "Ingest Instagram org posts and official UNT calendar events into Firestore for the next-14-days campus events feed.",
+    "type": "module",
+    "scripts": {
+      "scrape:ig": "node scrape_instagram.js",
+      "fetch:official": "node fetch_official.js",
+      "cleanup": "node cleanup.js"
+    },
+    "dependencies": {
+      "@playwright/test": "^1.48.0",
+      "firebase-admin": "^12.6.0",
+      "luxon": "^3.5.0",
+      "node-fetch": "^3.3.2",
+      "crypto-js": "^4.2.0"
+    }
+  }
+  

@@ -1,0 +1,167 @@
+{
+  "totalEvents": 100,
+  "eventsReturned": 20,
+  "eventsLoggedToFirebase": 20,
+  "events": [
+    {
+      "eventId": "50579616749920",
+      "title": "Discounted STI Testing: Test or Treat",
+      "organization": "UNT Official",
+      "location": "Student Health and Wellness Center at Chestnut Hall",
+      "rawDateTime": "Monday, October 27, 2025 at 12:00 AM",
+      "url": "https://studentaffairs.unt.edu/student-health-and-wellness-center/services/walk-in-sti-testing.html"
+    },
+    {
+      "eventId": "51003366429827",
+      "title": "REGISTRATION OPENS: Day Hike and Horseback Ride at Heard Wildlife Sanctuary",
+      "organization": "UNT Official",
+      "location": "Pohl Recreation Center",
+      "rawDateTime": "Monday, October 27, 2025 at 12:00 AM",
+      "url": "https://my.recsports.unt.edu/Program/GetProgramDetails?courseId=0058ac7a-79d4-45c3-8b60-02402ad917e6"
+    },
+    {
+      "eventId": "50835222076465",
+      "title": "Guest Artist Masterclass: \"The President's Own\" Marine Band, tuba and euphonium",
+      "organization": "UNT Official",
+      "location": "Music Building",
+      "rawDateTime": "Monday, October 27, 2025 at 8:00 AM",
+      "url": "music.unt.edu"
+    },
+    {
+      "eventId": "50772473291190",
+      "title": "Guest Artist Masterclass: Russell Sharpe, trombone",
+      "organization": "UNT Official",
+      "location": "Paul Voertman Concert Hall at the Music Building",
+      "rawDateTime": "Monday, October 27, 2025 at 8:00 AM",
+      "url": "music.unt.edu"
+    },
+    {
+      "eventId": "50834097633330",
+      "title": "Guest Artist Masterclass: \"The President's Own\" Marine Band, flute",
+      "organization": "UNT Official",
+      "location": "Music Building",
+      "rawDateTime": "Monday, October 27, 2025 at 8:45 AM",
+      "url": "music.unt.edu"
+    },
+    {
+      "eventId": "51019374668364",
+      "title": " Civil Discourse in Teaching Workshop – Virtual",
+      "organization": "UNT Official",
+      "location": null,
+      "rawDateTime": "Monday, October 27, 2025 at 9:00 AM to Monday, October 27, 2025 at 10:30 AM",
+      "url": ""
+    },
+    {
+      "eventId": "51019095915791",
+      "title": "Civil Discourse in Teaching Workshop – In Person",
+      "organization": "UNT Official",
+      "location": "Senate Chambers at the University Union",
+      "rawDateTime": "Monday, October 27, 2025 at 9:00 AM to Monday, October 27, 2025 at 10:30 AM",
+      "url": "https://vpaa.unt.edu/fs/development/teaching/civil-discourse-in-teaching-workshop.html"
+    },
+    {
+      "eventId": "50569296597156",
+      "title": "Guest Artist Masterclass: Trever Mowry, oboe",
+      "organization": "UNT Official",
+      "location": "Paul Voertman Concert Hall at the Music Building",
+      "rawDateTime": "Monday, October 27, 2025 at 9:00 AM",
+      "url": "music.unt.edu"
+    },
+    {
+      "eventId": "50816972470012",
+      "title": "Clay Candle Ghosts",
+      "organization": "UNT Official",
+      "location": "University Union",
+      "rawDateTime": "Monday, October 27, 2025 at 11:00 AM to Monday, October 27, 2025 at 8:00 PM",
+      "url": "https://studentaffairs.unt.edu/university-union/things-to-do/union-arts-center.html"
+    },
+    {
+      "eventId": "50693167135835",
+      "title": "Exploring Majors Workshop Series",
+      "organization": "UNT Official",
+      "location": "Sage Hall",
+      "rawDateTime": "Monday, October 27, 2025 at 11:00 AM to Monday, October 27, 2025 at 12:00 PM",
+      "url": "https://unt.navigate.eab.com/app/#/authentication/remote/"
+    },
+    {
+      "eventId": "50842691044940",
+      "title": "Test or Treat",
+      "organization": "UNT Official",
+      "location": "University Union South Lawn",
+      "rawDateTime": "Monday, October 27, 2025 at 1:00 PM to Monday, October 27, 2025 at 3:00 PM",
+      "url": "https://studentaffairs.unt.edu/student-health-and-wellness-center/office-of-health-promotion/"
+    },
+    {
+      "eventId": "50480800760025",
+      "title": "Pumpkin Painting and Crafting",
+      "organization": "UNT Official",
+      "location": "Frisco Landing -- UNT at Frisco",
+      "rawDateTime": "Monday, October 27, 2025 at 1:30 PM to Monday, October 27, 2025 at 2:30 PM",
+      "url": ""
+    },
+    {
+      "eventId": "50853566200696",
+      "title": "Study Abroad 101",
+      "organization": "UNT Official",
+      "location": null,
+      "rawDateTime": "Monday, October 27, 2025 at 2:00 PM to Monday, October 27, 2025 at 2:30 PM",
+      "url": "studyabroad.unt.edu"
+    },
+    {
+      "eventId": "50339870185697",
+      "title": "Mindfulness & Meditation for Mental Health",
+      "organization": "UNT Official",
+      "location": null,
+      "rawDateTime": "Monday, October 27, 2025 at 3:00 PM to Monday, October 27, 2025 at 4:00 PM",
+      "url": "cts.unt.edu"
+    },
+    {
+      "eventId": "50940288038938",
+      "title": "The Spark @ Discovery Park Workshop: Pin Loom Weaving",
+      "organization": "UNT Official",
+      "location": "Discovery Park Building",
+      "rawDateTime": "Monday, October 27, 2025 at 3:00 PM to Monday, October 27, 2025 at 4:00 PM",
+      "url": "https://calendar.library.unt.edu/event/15484625"
+    },
+    {
+      "eventId": "50940296346759",
+      "title": "The Spark @ Willis Workshop: Leather Keychains",
+      "organization": "UNT Official",
+      "location": "Willis Library",
+      "rawDateTime": "Monday, October 27, 2025 at 3:00 PM to Monday, October 27, 2025 at 4:00 PM",
+      "url": "https://calendar.library.unt.edu/event/15484110"
+    },
+    {
+      "eventId": "51087823547622",
+      "title": "Move Texas Election Kahoot Night",
+      "organization": "UNT Official",
+      "location": "University Union",
+      "rawDateTime": "Monday, October 27, 2025 at 3:30 PM to Monday, October 27, 2025 at 4:45 PM",
+      "url": "https://unt.campuslabs.com/engage/event/11817497"
+    },
+    {
+      "eventId": "50817677086905",
+      "title": "Mean Green Flow ",
+      "organization": "UNT Official",
+      "location": "Pohl Recreation Center",
+      "rawDateTime": "Monday, October 27, 2025 at 4:00 PM",
+      "url": "https://my.recsports.unt.edu/program/getprogramdetails?courseid=b58ac443-7189-4713-bf3f-d282582f5ad0"
+    },
+    {
+      "eventId": "51012212972616",
+      "title": "Student Chapter of The Wildlife Society: Ashley Giron",
+      "organization": "UNT Official",
+      "location": "Environmental Education Science and Technology Building",
+      "rawDateTime": "Monday, October 27, 2025 at 4:00 PM to Monday, October 27, 2025 at 5:00 PM",
+      "url": "https://unt.campuslabs.com/engage/event/11782945"
+    },
+    {
+      "eventId": "50902155411420",
+      "title": "AAAE Guest Speaker Series: Ryan Adams, Airport Director",
+      "organization": "UNT Official",
+      "location": "Business Leadership Building",
+      "rawDateTime": "Monday, October 27, 2025 at 5:00 PM to Monday, October 27, 2025 at 6:00 PM",
+      "url": "https://unt.campuslabs.com/engage/event/11734417"
+    }
+  ]
+}

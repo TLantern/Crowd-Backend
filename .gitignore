@@ -47,3 +47,5 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Scraper
+serviceAccountKey.json
