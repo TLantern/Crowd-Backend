@@ -5,18 +5,62 @@
 import { chromium } from "@playwright/test";
 import { DateTime } from "luxon";
 import {
-  writeEngageRaw,
   writeNormalizedEvent
 } from "./firestore.js";
 import { rsleep } from "./utils.js";
+import { writeFileSync, existsSync, mkdirSync, readFileSync } from "fs";
+import { join } from "path";
 
 const BASE = "https://unt.campuslabs.com/engage";
 
 // How far out we care. We still run cleanup after.
 const MAX_ORGS = 500; // safety cap
 const MAX_EVENTS_PER_ORG = 50;
+const MAX_TOTAL_EVENTS = 10; // Limit total events for testing
 
 const TZ = "America/Chicago";
+
+// Local storage for raw events
+const RAW_EVENTS_DIR = "./raw_events";
+const RAW_EVENTS_FILE = join(RAW_EVENTS_DIR, "engage_events.json");
+
+// Ensure raw events directory exists
+if (!existsSync(RAW_EVENTS_DIR)) {
+  mkdirSync(RAW_EVENTS_DIR, { recursive: true });
+}
+
+// Load existing raw events
+let rawEvents = [];
+if (existsSync(RAW_EVENTS_FILE)) {
+  try {
+    const data = JSON.parse(readFileSync(RAW_EVENTS_FILE, 'utf8'));
+    rawEvents = Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.log("⚠️  Could not load existing raw events, starting fresh");
+    rawEvents = [];
+  }
+}
+
+// Save raw events to local file
+function saveRawEvent(eventId, rawPayload) {
+  const timestamp = new Date().toISOString();
+  const eventData = {
+    eventId,
+    ...rawPayload,
+    scrapedAt: timestamp
+  };
+  
+  // Check if event already exists and update it
+  const existingIndex = rawEvents.findIndex(e => e.eventId === eventId);
+  if (existingIndex >= 0) {
+    rawEvents[existingIndex] = eventData;
+  } else {
+    rawEvents.push(eventData);
+  }
+  
+  // Save to file
+  writeFileSync(RAW_EVENTS_FILE, JSON.stringify(rawEvents, null, 2));
+}
 
 // --- date/time parser ---
 // Improved regex-based parsing for various UNT Engage date formats
@@ -532,11 +576,21 @@ async function run() {
   let totalEvents = 0;
 
   for (const { slug, name } of orgs) {
+    if (totalEvents >= MAX_TOTAL_EVENTS) {
+      console.log(`\n🛑 Reached maximum of ${MAX_TOTAL_EVENTS} events. Stopping.`);
+      break;
+    }
+
     console.log(`\n🏢 Processing org: ${name} (${slug})`);
     const eventLinks = await getOrgEventLinks(page, slug);
     console.log(`📅 Found ${eventLinks.length} events`);
 
     for (const link of eventLinks) {
+      if (totalEvents >= MAX_TOTAL_EVENTS) {
+        console.log(`\n🛑 Reached maximum of ${MAX_TOTAL_EVENTS} events. Stopping.`);
+        break;
+      }
+
       try {
         const { eventId, normalized, rawPayload } = await scrapeEventDetail(
           page,
@@ -544,14 +598,14 @@ async function run() {
           name
         );
 
-        // write raw for audit
-        await writeEngageRaw(eventId, rawPayload);
+        // save raw event locally
+        saveRawEvent(eventId, rawPayload);
 
         // write normalized to campus_events_live
         await writeNormalizedEvent(normalized, 1.0);
 
         totalEvents += 1;
-        console.log(`  ✅ Scraped: ${normalized.title}`);
+        console.log(`  ✅ Scraped: ${normalized.title} (${totalEvents}/${MAX_TOTAL_EVENTS})`);
         if (rawPayload.dtRaw) {
           console.log(`     📅 Raw Date/Time: ${rawPayload.dtRaw.substring(0, 100)}...`);
         }
@@ -576,7 +630,9 @@ async function run() {
     JSON.stringify(
       {
         orgsScanned: orgs.length,
-        totalEventsPushed: totalEvents
+        totalEventsPushed: totalEvents,
+        rawEventsSavedLocally: rawEvents.length,
+        localFile: RAW_EVENTS_FILE
       },
       null,
       2

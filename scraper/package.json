@@ -6,6 +6,7 @@
     "scripts": {
       "scrape:ig": "node scrape_instagram.js",
       "fetch:official": "node fetch_official.js",
+      "fetch:engage": "node fetch_engage.js",
       "cleanup": "node cleanup.js"
     },
     "dependencies": {
