@@ -6,19 +6,23 @@ import { readFileSync, existsSync } from "fs";
 import { canonicalIdForEvent } from "./utils.js";
 
 if (!admin.apps.length) {
-  if (!existsSync("./serviceAccountKey.json")) {
-    throw new Error(
-      "Missing serviceAccountKey.json. Put your Firebase Admin key in scraper/serviceAccountKey.json"
+  if (existsSync("./serviceAccountKey.json")) {
+    // Use service account key if available
+    const serviceAccount = JSON.parse(
+      readFileSync("./serviceAccountKey.json", "utf8")
     );
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("🔑 Using service account key authentication");
+  } else {
+    // Fall back to application default credentials (Firebase CLI login)
+    admin.initializeApp({
+      projectId: "crowd-6193c"
+    });
+    console.log("🔑 Using application default credentials (Firebase CLI)");
   }
-
-  const serviceAccount = JSON.parse(
-    readFileSync("./serviceAccountKey.json", "utf8")
-  );
-
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
 }
 
 export const db = admin.firestore();

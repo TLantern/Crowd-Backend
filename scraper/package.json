@@ -7,7 +7,8 @@
       "scrape:ig": "node scrape_instagram.js",
       "fetch:official": "node fetch_official.js",
       "fetch:engage": "node fetch_engage.js",
-      "cleanup": "node cleanup.js"
+      "cleanup": "node cleanup.js",
+      "clear:campus": "node clear_campus_events.js"
     },
     "dependencies": {
       "@playwright/test": "^1.48.0",
