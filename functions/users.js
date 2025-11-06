@@ -3,8 +3,9 @@
  * Handles CRUD operations and triggers for user data
  */
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const functionsV1 = require("firebase-functions/v1");
+const admin = require("firebase-admin");
 
 const db = admin.firestore();
 
@@ -165,8 +166,8 @@ exports.getUser = functions.https.onCall(async (data, context) => {
  * Trigger: When a user is created
  * Automatically sets up user profile and initial data
  */
-exports.onUserCreate = functions.firestore
-  .document('users/{userId}')
+exports.onUserCreate = functionsV1.firestore
+  .document("users/{userId}")
   .onCreate(async (snap, context) => {
     try {
       const userData = snap.data();
@@ -198,8 +199,8 @@ exports.onUserCreate = functions.firestore
  * Trigger: When a user is updated
  * Logs user updates and performs any necessary side effects
  */
-exports.onUserUpdate = functions.firestore
-  .document('users/{userId}')
+exports.onUserUpdate = functionsV1.firestore
+  .document("users/{userId}")
   .onUpdate(async (change, context) => {
     try {
       const beforeData = change.before.data();
@@ -225,8 +226,8 @@ exports.onUserUpdate = functions.firestore
  * Trigger: When a user is deleted
  * Cleans up related data and logs the deletion
  */
-exports.onUserDelete = functions.firestore
-  .document('users/{userId}')
+exports.onUserDelete = functionsV1.firestore
+  .document("users/{userId}")
   .onDelete(async (snap, context) => {
     try {
       const userData = snap.data();

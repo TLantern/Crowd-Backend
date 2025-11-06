@@ -16,6 +16,7 @@ const eventFunctions = require('./events');
 const signalFunctions = require('./signals');
 const pointFunctions = require('./points');
 const leaderboardFunctions = require('./leaderboard');
+const fetchOfficialEventsFunction = require('./fetchOfficialEvents');
 
 // Export all functions
 module.exports = {
@@ -63,4 +64,7 @@ module.exports = {
   // Leaderboard functions
   getLeaderboard: leaderboardFunctions.getLeaderboard,
   getUserRank: leaderboardFunctions.getUserRank,
+
+  // Scraper functions
+  fetchOfficialEvents: fetchOfficialEventsFunction.fetchOfficialEvents,
 };

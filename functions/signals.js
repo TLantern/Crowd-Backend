@@ -3,8 +3,9 @@
  * Handles CRUD operations and triggers for signal data
  */
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const functionsV1 = require("firebase-functions/v1");
+const admin = require("firebase-admin");
 const {encodeGeohash, getGeohashRange, calculateDistance} = require('./geohash');
 
 const db = admin.firestore();
@@ -380,8 +381,8 @@ exports.getNearbySignals = functions.https.onCall(async (data, context) => {
  * Trigger: When a signal is created
  * Updates event attendee count, signal strength, and nearby signals' color/radius
  */
-exports.onSignalCreate = functions.firestore
-  .document('signals/{signalId}')
+exports.onSignalCreate = functionsV1.firestore
+  .document("signals/{signalId}")
   .onCreate(async (snap, context) => {
     try {
       const signalData = snap.data();
@@ -443,8 +444,8 @@ exports.onSignalCreate = functions.firestore
  * Trigger: When a signal is updated
  * Recalculates event signal strength
  */
-exports.onSignalUpdate = functions.firestore
-  .document('signals/{signalId}')
+exports.onSignalUpdate = functionsV1.firestore
+  .document("signals/{signalId}")
   .onUpdate(async (change, context) => {
     try {
       const beforeData = change.before.data();
@@ -488,8 +489,8 @@ exports.onSignalUpdate = functions.firestore
  * Trigger: When a signal is deleted
  * Updates event attendee count, signal strength, and nearby signals' color/radius
  */
-exports.onSignalDelete = functions.firestore
-  .document('signals/{signalId}')
+exports.onSignalDelete = functionsV1.firestore
+  .document("signals/{signalId}")
   .onDelete(async (snap, context) => {
     try {
       const signalData = snap.data();

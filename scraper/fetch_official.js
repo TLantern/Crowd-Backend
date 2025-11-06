@@ -122,9 +122,15 @@ function normalizeDescription(htmlDescription) {
   return normalized;
 }
 
-async function fetchOfficialEvents14d() {
+async function fetchOfficialEvents14d(page = 1, startDate = null, endDate = null) {
+  // Target: Nov 12 11:59 PM CST = Nov 13 5:59 AM UTC
+  const targetEnd = "2025-11-13";
+  const now = new Date();
+  const startDateStr = startDate || now.toISOString().split('T')[0];
+  const endDateStr = endDate || targetEnd;
+  
   const resp = await fetch(
-    "https://calendar.unt.edu/api/2/events?days=14&pp=200"
+    `https://calendar.unt.edu/api/2/events?start=${startDateStr}&end=${endDateStr}&pp=500&page=${page}`
   );
   if (!resp.ok) {
     throw new Error(
@@ -158,20 +164,52 @@ async function fetchOfficialEvents14d() {
       contactInfo: ev.contact_info || ev.contact || null
     });
   }
-  return out;
+  return { events: out, hasMore: (data.events?.length || 0) >= 500 };
 }
 
 async function run() {
-  const events = await fetchOfficialEvents14d();
+  const TARGET_DATE = "2025-11-13T05:59:00.000Z"; // Nov 12 11:59 PM CST
+  
+  let allEvents = [];
+  
+  // Query in date range chunks to avoid 100-event limit
+  const dateRanges = [
+    { start: "2025-11-06", end: "2025-11-08" },
+    { start: "2025-11-09", end: "2025-11-10" },
+    { start: "2025-11-10", end: "2025-11-11" },
+    { start: "2025-11-11", end: "2025-11-12" },
+    { start: "2025-11-12", end: "2025-11-13" }
+  ];
+  
+  for (const range of dateRanges) {
+    console.log(`📅 Fetching events from ${range.start} to ${range.end}...`);
+    let page = 1;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const result = await fetchOfficialEvents14d(page, range.start, range.end);
+      const newEvents = result.events.filter(e => 
+        !allEvents.find(existing => existing.eventId === e.eventId)
+      );
+      allEvents.push(...newEvents);
+      hasMore = result.hasMore && result.events.length > 0;
+      page++;
+      console.log(`  📄 Page ${page - 1}: ${result.events.length} events, ${newEvents.length} new`);
+      
+      if (newEvents.length === 0 || (!hasMore && result.events.length < 100)) {
+        break;
+      }
+    }
+  }
 
   // Process all events (not just first 20)
-  console.log(`📊 Processing ${events.length} events for next 14 days...`);
+  console.log(`📊 Processing ${allEvents.length} events for next 14 days...`);
 
   // Log to Firebase/Firestore
   console.log("🔥 Logging events to Firebase...");
   let firebaseCount = 0;
   
-  for (const ev of events) {
+  for (const ev of allEvents) {
     try {
       // Write raw audit doc
       await writeOfficialRaw(ev.eventId, ev);
@@ -206,24 +244,74 @@ async function run() {
     }
   }
 
+  // Find latest event date
+  const dates = allEvents.map(e => e.endTimeISO).filter(d => d).sort().reverse();
+  const latestDate = dates[0] || null;
+  
+  console.log(`\n📅 Latest event date: ${latestDate || 'none'}`);
+  console.log(`🎯 Target date: ${TARGET_DATE}`);
+  
+  if (latestDate && latestDate >= TARGET_DATE) {
+    console.log(`✅ Reached target date!`);
+  } else if (latestDate) {
+    const hoursDiff = (new Date(TARGET_DATE) - new Date(latestDate)) / (1000 * 60 * 60);
+    if (hoursDiff <= 2) {
+      console.log(`✅ Reached closest available date (${hoursDiff.toFixed(1)} hours before target - no events scheduled)`);
+    } else {
+      console.log(`⚠️  Not yet at target date (${hoursDiff.toFixed(1)} hours away)`);
+    }
+  } else {
+    console.log(`⚠️  No events found`);
+  }
+
   // Create JSON output
   const output = {
-    totalEvents: events.length,
-    eventsProcessed: events.length,
+    totalEvents: allEvents.length,
+    eventsProcessed: allEvents.length,
     eventsLoggedToFirebase: firebaseCount,
-    events: events
+    latestEventDate: latestDate,
+    targetDate: TARGET_DATE,
+    events: allEvents
   };
 
   // Write to JSON file
   const filename = `unt_events_${new Date().toISOString().split('T')[0]}.json`;
   writeFileSync(filename, JSON.stringify(output, null, 2));
   
-  console.log(`✅ Saved ${events.length} events to ${filename}`);
+  console.log(`✅ Saved ${allEvents.length} events to ${filename}`);
   console.log(`🔥 Logged ${firebaseCount} events to Firebase`);
-  console.log(`📊 Total events processed: ${events.length}`);
+  console.log(`📊 Total events processed: ${allEvents.length}`);
+  
+  return { latestDate, reachedTarget: latestDate && latestDate >= TARGET_DATE };
 }
 
-run().catch((err) => {
+const TARGET_DATE = "2025-11-13T05:59:00.000Z"; // Nov 12 11:59 PM CST
+
+(async () => {
+  try {
+    const result = await run();
+    
+    if (result.reachedTarget) {
+      console.log(`\n✅ Successfully reached target date`);
+      process.exit(0);
+    }
+    
+    // Check if we're very close (within 2 hours) - likely no more events scheduled
+    if (result.latestDate) {
+      const hoursDiff = (new Date(TARGET_DATE) - new Date(result.latestDate)) / (1000 * 60 * 60);
+      if (hoursDiff <= 2) {
+        console.log(`\n✅ Fetched all available events (${hoursDiff.toFixed(1)} hours before target - no more events scheduled)`);
+        process.exit(0);
+      }
+    }
+    
+    console.log(`\n⚠️  Did not reach target date`);
+    process.exit(1);
+  } catch (err) {
+    console.error(`❌ Error:`, err);
+    process.exit(1);
+  }
+})().catch((err) => {
   console.error(err);
   process.exit(1);
 });

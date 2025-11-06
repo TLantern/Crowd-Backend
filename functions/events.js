@@ -3,8 +3,9 @@
  * Handles CRUD operations and triggers for event data
  */
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const functionsV1 = require("firebase-functions/v1");
+const admin = require("firebase-admin");
 const {encodeGeohash, getGeohashRange, calculateDistance} = require('./geohash');
 
 const db = admin.firestore();
@@ -334,8 +335,8 @@ exports.getNearbyEvents = functions.https.onCall(async (data, context) => {
  * Trigger: When an event is created
  * Logs event creation and performs initial setup
  */
-exports.onEventCreate = functions.firestore
-  .document('events/{eventId}')
+exports.onEventCreate = functionsV1.firestore
+  .document("events/{eventId}")
   .onCreate(async (snap, context) => {
     try {
       const eventData = snap.data();
@@ -367,8 +368,8 @@ exports.onEventCreate = functions.firestore
  * Trigger: When an event is updated
  * Logs event updates and performs any necessary side effects
  */
-exports.onEventUpdate = functions.firestore
-  .document('events/{eventId}')
+exports.onEventUpdate = functionsV1.firestore
+  .document("events/{eventId}")
   .onUpdate(async (change, context) => {
     try {
       const beforeData = change.before.data();
@@ -394,8 +395,8 @@ exports.onEventUpdate = functions.firestore
  * Trigger: When an event is deleted
  * Cleans up related data and logs the deletion
  */
-exports.onEventDelete = functions.firestore
-  .document('events/{eventId}')
+exports.onEventDelete = functionsV1.firestore
+  .document("events/{eventId}")
   .onDelete(async (snap, context) => {
     try {
       const eventData = snap.data();

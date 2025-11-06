@@ -3,8 +3,9 @@
  * Handles CRUD operations and triggers for points data
  */
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const functionsV1 = require("firebase-functions/v1");
+const admin = require("firebase-admin");
 
 const db = admin.firestore();
 
@@ -235,8 +236,8 @@ exports.getUserPoints = functions.https.onCall(async (data, context) => {
  * Trigger: When a point is created
  * Updates user's total aura points
  */
-exports.onPointCreate = functions.firestore
-  .document('points/{pointId}')
+exports.onPointCreate = functionsV1.firestore
+  .document("points/{pointId}")
   .onCreate(async (snap, context) => {
     try {
       const pointData = snap.data();
@@ -260,8 +261,8 @@ exports.onPointCreate = functions.firestore
  * Trigger: When a point is updated
  * Updates user's total aura points based on the difference
  */
-exports.onPointUpdate = functions.firestore
-  .document('points/{pointId}')
+exports.onPointUpdate = functionsV1.firestore
+  .document("points/{pointId}")
   .onUpdate(async (change, context) => {
     try {
       const beforeData = change.before.data();
@@ -291,8 +292,8 @@ exports.onPointUpdate = functions.firestore
  * Trigger: When a point is deleted
  * Decreases user's total aura points
  */
-exports.onPointDelete = functions.firestore
-  .document('points/{pointId}')
+exports.onPointDelete = functionsV1.firestore
+  .document("points/{pointId}")
   .onDelete(async (snap, context) => {
     try {
       const pointData = snap.data();
