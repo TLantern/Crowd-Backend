@@ -18,8 +18,9 @@
     "startISO": "2025-11-19T18:00:00.000-06:00",
     "endISO": "2025-11-19T21:00:00.000-06:00",
     "locationName": "University Union",
+    "roomNumber": "2025",
     "url": "https://unt.campuslabs.com/engage/event/11761713",
-    "scrapedAt": "2025-10-28T05:35:26.876Z"
+    "scrapedAt": "2025-11-16T21:25:54.467Z"
   },
   {
     "eventId": "11692451",
@@ -29,8 +30,9 @@
     "startISO": "2025-11-20T18:00:00.000-06:00",
     "endISO": "2025-11-20T20:00:00.000-06:00",
     "locationName": "University Union",
+    "roomNumber": "401",
     "url": "https://unt.campuslabs.com/engage/event/11692451",
-    "scrapedAt": "2025-10-28T05:35:31.527Z"
+    "scrapedAt": "2025-11-16T21:26:00.120Z"
   },
   {
     "eventId": "11491879",
@@ -63,7 +65,7 @@
     "endISO": "2025-11-13T19:30:00.000-06:00",
     "locationName": "University Union",
     "url": "https://unt.campuslabs.com/engage/event/11491881",
-    "scrapedAt": "2025-10-28T05:35:57.423Z"
+    "scrapedAt": "2025-11-14T01:22:18.024Z"
   },
   {
     "eventId": "11491882",
@@ -73,8 +75,9 @@
     "startISO": "2025-11-20T18:30:00.000-06:00",
     "endISO": "2025-11-20T19:30:00.000-06:00",
     "locationName": "University Union",
+    "roomNumber": "255",
     "url": "https://unt.campuslabs.com/engage/event/11491882",
-    "scrapedAt": "2025-10-28T05:36:02.860Z"
+    "scrapedAt": "2025-11-16T21:27:01.864Z"
   },
   {
     "eventId": "11491883",
@@ -84,8 +87,9 @@
     "startISO": "2025-12-04T18:30:00.000-06:00",
     "endISO": "2025-12-04T19:30:00.000-06:00",
     "locationName": "University Union",
+    "roomNumber": "255",
     "url": "https://unt.campuslabs.com/engage/event/11491883",
-    "scrapedAt": "2025-10-28T05:36:09.135Z"
+    "scrapedAt": "2025-11-16T21:27:29.050Z"
   },
   {
     "eventId": "11825586",
@@ -108,5 +112,61 @@
     "locationName": "Pohl Recreation Center",
     "url": "https://unt.campuslabs.com/engage/event/11825587",
     "scrapedAt": "2025-10-28T05:36:39.235Z"
+  },
+  {
+    "eventId": "11878316",
+    "title": "Rooted in Presence: Awakening the five senses",
+    "orgName": "these organizations",
+    "dtRaw": "Thursday, November 13 2025 at 6:30 PM CST to\n\nThursday, November 13 2025 at 7:30 PM CST",
+    "startISO": "2025-11-13T18:30:00.000-06:00",
+    "endISO": "2025-11-13T19:30:00.000-06:00",
+    "locationName": null,
+    "url": "https://unt.campuslabs.com/engage/event/11878316",
+    "scrapedAt": "2025-11-14T01:22:12.701Z"
+  },
+  {
+    "eventId": "11887099",
+    "title": "Active Minds: Pajama Party",
+    "orgName": "Active Minds",
+    "dtRaw": "Tuesday, November 18 2025 at 6:30 PM CST to\n\nTuesday, November 18 2025 at 7:30 PM CST",
+    "startISO": "2025-11-18T18:30:00.000-06:00",
+    "endISO": "2025-11-18T19:30:00.000-06:00",
+    "locationName": null,
+    "roomNumber": "401",
+    "url": "https://unt.campuslabs.com/engage/event/11887099",
+    "scrapedAt": "2025-11-16T21:26:35.183Z"
+  },
+  {
+    "eventId": "11887362",
+    "title": "African Student Organization Dodgeball game",
+    "orgName": "African Students Organization",
+    "dtRaw": "Saturday, November 15 2025 at 4:30 PM CST to\n\nSaturday, November 15 2025 at 7:30 PM CST",
+    "startISO": "2025-11-15T16:30:00.000-06:00",
+    "endISO": "2025-11-15T19:30:00.000-06:00",
+    "locationName": null,
+    "url": "https://unt.campuslabs.com/engage/event/11887362",
+    "scrapedAt": "2025-11-14T01:22:56.760Z"
+  },
+  {
+    "eventId": "11825588",
+    "title": "African Student Association Dance Practice",
+    "orgName": "African Students Organization",
+    "dtRaw": "Sunday, November 16 2025 at 6:00 PM CST to\n\nSunday, November 16 2025 at 8:00 PM CST",
+    "startISO": "2025-11-16T18:00:00.000-06:00",
+    "endISO": "2025-11-16T20:00:00.000-06:00",
+    "locationName": "Pohl Recreation Center",
+    "url": "https://unt.campuslabs.com/engage/event/11825588",
+    "scrapedAt": "2025-11-14T01:23:01.966Z"
+  },
+  {
+    "eventId": "11869932",
+    "title": "ASO Records",
+    "orgName": "African Students Organization",
+    "dtRaw": "Monday, November 17 2025 at 5:00 PM CST to\n\nMonday, November 17 2025 at 9:30 PM CST",
+    "startISO": "2025-11-17T17:00:00.000-06:00",
+    "endISO": "2025-11-17T21:30:00.000-06:00",
+    "locationName": null,
+    "url": "https://unt.campuslabs.com/engage/event/11869932",
+    "scrapedAt": "2025-11-14T01:23:07.842Z"
   }
 ]

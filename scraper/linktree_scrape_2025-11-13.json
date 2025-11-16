@@ -1,0 +1,78 @@
+{
+  "scrapedAt": "2025-11-13T03:29:43.878Z",
+  "sourceUrl": "https://linktr.ee/richcreatives",
+  "totalLinksFound": 13,
+  "linksWithDates": 4,
+  "uniqueLinks": 4,
+  "events": [
+    {
+      "title": "Golden Hour: After Dark | RICH CREATIVES | Wed, Nov 12, 2025 | Vyb Lounge",
+      "url": "https://posh.vip/e/golden-hour-after-dark-1",
+      "normalizedUrl": "https://posh.vip/e/golden-hour-after-dark-1",
+      "eventDetails": {
+        "title": "Golden Hour: After Dark",
+        "venue": "RICH CREATIVESVerified BackgroundVerified Check",
+        "dateTime": "Wed, Nov 12 at 9:00 PM - 2:00 AM (CST)",
+        "description": "Temptations Lounge - Arlington\n\nWed, Nov 12 at 9:00 PM - 2:00 AM\n\nRaniah and 16 others going\n\nView Guestlist\n\nMore events\n\nRICH CREATIVES\n\n5,052 attendees\n\nDiscover Life Offline\n\nScan to download\n\nInstant Ticket Access\n\nEasy Ticket Transfers\n\nCurated For You\n\nTerms of Service\n\nPrivacy Policy\n\nGolden Hour: After DarkTemptations Lounge - Arlington Wed, Nov 12 at 9:00 PM - 2:00 AM\n\n!function (w, d, t) {\n\n\"@context\": \"https://schema.org\",\n\n\"@type\": \"Event\",\n\n\"name\": \"Golden Hour: After Dark\",\n\n\"startDate\": \"2025-11-12T21:00:00-06:00\",\n\n\"endDate\": \"2025-11-13T02:00:00-06:00\",\n\n\"eventStatus\": \"https://schema.org/EventScheduled\",\n\n\"eventAttendanceMode\": \"https://schema.org/OfflineEventAttendanceMode\",\n\n\"url\": \"https://www.posh.vip/e/golden-hour-after-dark-1\",\n\n\"https://posh.vip/cdn-cgi/image/width=1200,height=630,fit=scale-down,format=auto,quality=50/https://posh-images-alts-production.s3.amazonaws.com/6913b4f07a5202754fca21cd/1400x1750.webp\",\n\n\"https://posh.vip/cdn-cgi/image/width=600,height=315,fit=scale-down,format=auto,quality=50/https://posh-images-alts-production.s3.amazonaws.com/6913b4f07a5202754fca21cd/1400x1750.webp\",\n\n\"https://posh.vip/cdn-cgi/image/width=400,height=215,fit=scale-down,format=auto,quality=50/https://posh-images-alts-production.s3.amazonaws.com/6913b4f07a5202754fca21cd/1400x1750.webp\"\n\n\"@type\": \"Organization\",\n\n\"name\": \"RICH CREATIVES\",\n\n\"url\": \"https://posh.vip/g/rich-creatives\"\n\n\"@type\": \"Place\",\n\n\"name\": \"Temptations Lounge - Arlington \",\n\n\"@type\": \"PostalAddress\",\n\n\"@type\": \"GeoCoordinates\",\n\n\"latitude\": 32.6860161,\n\n\"longitude\": -97.13056929999999\n\n\"@type\": \"Offer\",\n\n\"priceCurrency\": \"USD\",\n\n\"availability\": \"https://schema.org/InStock\"\n\n!function(f,b,e,v,n,t,s)\n\n{if(f.fbq)return;n=f.fbq=function(){n.callMethod?\n\nn.callMethod.apply(n,arguments):n.queue.push(arguments)};\n\nif(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';\n\nn.queue=[];t=b.createElement(e);t.async=!0;\n\nt.src=v;s=b.getElementsByTagName(e)[0];\n\ns.parentNode.insertBefore(t,s)}",
+        "address": "3701 S Cooper St, Arlington, TX 76015",
+        "additionalInfo": [
+          "\"description\": \"Posh - Get tickets for Golden Hour: After Dark by RICH CREATIVES - on Wed, Nov 12, 2025 - at Temptations Lounge - Arlington \","
+        ]
+      }
+    },
+    {
+      "title": "She Wants The Juice🧃 | RICH CREATIVES | Wed, Nov 12th, 2025 | Temptations",
+      "url": "https://posh.vip/e/she-wants-the-juice",
+      "normalizedUrl": "https://posh.vip/e/she-wants-the-juice",
+      "eventDetails": {
+        "title": "She Wants The Juice",
+        "venue": "Takeover Entertainment LLC",
+        "dateTime": "Wed, Nov 12 at 9:00 PM - 2:00 AM (CST)",
+        "description": "Temptations Lounge\n\nWed, Nov 12 at 9:00 PM - 2:00 AM\n\nThe Official UTA Humpnight After Party, Get Your Presales Now!!\n\nWednesday November 12th\n\nThe Official UTA Homecoming Humpnight Afterparty\n\nTeam Takeover Presents\n\n9 pm - 2 am\n\nEarly arrival suggested\n\n3701 S Cooper St,\n\nArlington, TX 76015\n\nSecurity Enforced\n\nPresales Available Now\n\nMore events\n\n877 attendees\n\nDiscover Life Offline\n\nScan to download\n\nInstant Ticket Access\n\nEasy Ticket Transfers\n\nCurated For You\n\nTerms of Service\n\nPrivacy Policy\n\nShe Wants The JuiceTemptations LoungeWed, Nov 12 at 9:00 PM - 2:00 AM\n\n!function (w, d, t) {\n\n\"@context\": \"https://schema.org\",\n\n\"@type\": \"Event\",\n\n\"name\": \"She Wants The Juice\",\n\n\"startDate\": \"2025-11-12T21:00:00-06:00\",\n\n\"endDate\": \"2025-11-13T02:00:00-06:00\",\n\n\"eventStatus\": \"https://schema.org/EventScheduled\",\n\n\"eventAttendanceMode\": \"https://schema.org/OfflineEventAttendanceMode\",\n\n\"url\": \"https://www.posh.vip/e/she-wants-the-juice\",\n\n\"https://posh.vip/cdn-cgi/image/width=1200,height=630,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a7f35ebddb2c624b95b3f\",\n\n\"https://posh.vip/cdn-cgi/image/width=600,height=315,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a7f35ebddb2c624b95b3f\",\n\n\"https://posh.vip/cdn-cgi/image/width=400,height=215,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a7f35ebddb2c624b95b3f\"\n\n\"@type\": \"Organization\",\n\n\"name\": \"Takeover Entertainment LLC\",\n\n\"url\": \"https://posh.vip/g/takeoverent\"\n\n\"@type\": \"Place\",\n\n\"name\": \"Temptations Lounge\",\n\n\"@type\": \"PostalAddress\",\n\n\"@type\": \"GeoCoordinates\",\n\n\"latitude\": 32.6850456,\n\n\"longitude\": -97.1305325\n\n\"@type\": \"Offer\",\n\n\"priceCurrency\": \"USD\",\n\n\"availability\": \"https://schema.org/InStock\"\n\n!function(f,b,e,v,n,t,s)\n\n{if(f.fbq)return;n=f.fbq=function(){n.callMethod?\n\nn.callMethod.apply(n,arguments):n.queue.push(arguments)};\n\nif(!f._fbq)f._fbq=n;n.push=n;n.l",
+        "address": "3701 S Cooper St, Arlington, TX 76015",
+        "additionalInfo": [
+          "\"description\": \"Posh - Get tickets for She Wants The Juice by Takeover Entertainment LLC - on Wed, Nov 12, 2025 - at Temptations Lounge\",",
+          "Early arrival suggested",
+          "Security Enforced",
+          "Presales Available Now"
+        ]
+      }
+    },
+    {
+      "title": "817 & Park 🎤 | RICH CREATIVES | Fri. Nov 14th | 2025",
+      "url": "https://posh.vip/e/817-and-park",
+      "normalizedUrl": "https://posh.vip/e/817-and-park",
+      "eventDetails": {
+        "title": "817 And Park",
+        "venue": "Takeover Entertainment LLC",
+        "dateTime": "9 pm - 2 pm",
+        "description": "Fri, Nov 14 at 9:00 PM - Sat, Nov 15 at 2:00 PM\n\nFri, Nov 14 at 9:00 PM - Sat, Nov 15 at 2:00 PM (CST)\n\nPresales Avaliable Get Them Now!!\n\nTaylor and 44 others going\n\nView Guestlist\n\nFriday November 14th\n\n817 and Park\n\nThe Official UTA 2000’s Party\n\nTeam Takeover X Stokes X Rich X TLA Presents\n\nEarly arrival suggested\n\nSecurity Enforced\n\nPresales Available Now\n\nMore events\n\n877 attendees\n\nDiscover Life Offline\n\nScan to download\n\nInstant Ticket Access\n\nEasy Ticket Transfers\n\nCurated For You\n\nTerms of Service\n\nPrivacy Policy\n\n817 And ParkCoopersFri, Nov 14 at 9:00 PM - Sat, Nov 15 at 2:00 PM\n\n!function (w, d, t) {\n\n\"@context\": \"https://schema.org\",\n\n\"@type\": \"Event\",\n\n\"name\": \"817 And Park\",\n\n\"startDate\": \"2025-11-14T21:00:00-06:00\",\n\n\"endDate\": \"2025-11-15T14:00:00-06:00\",\n\n\"eventStatus\": \"https://schema.org/EventScheduled\",\n\n\"eventAttendanceMode\": \"https://schema.org/OfflineEventAttendanceMode\",\n\n\"url\": \"https://www.posh.vip/e/817-and-park\",\n\n\"https://posh.vip/cdn-cgi/image/width=1200,height=630,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a8da2d21e29b788687b65\",\n\n\"https://posh.vip/cdn-cgi/image/width=600,height=315,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a8da2d21e29b788687b65\",\n\n\"https://posh.vip/cdn-cgi/image/width=400,height=215,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a8da2d21e29b788687b65\"\n\n\"@type\": \"Organization\",\n\n\"name\": \"Takeover Entertainment LLC\",\n\n\"url\": \"https://posh.vip/g/takeoverent\"\n\n\"@type\": \"Place\",\n\n\"name\": \"Coopers\",\n\n\"@type\": \"PostalAddress\",\n\n\"@type\": \"GeoCoordinates\",\n\n\"latitude\": 32.6871842,\n\n\"longitude\": -97.13208089999999\n\n\"@type\": \"Offer\",\n\n\"priceCurrency\": \"USD\",\n\n\"availability\": \"https://schema.org/InStock\"\n\n!function(f,b,e,v,n,t,s)\n\n{if(f.fbq)return;n=f.fbq=function(){n.callMethod?\n\nn.callMethod.apply(n,arguments):n.queue.push(arguments)};\n\nif(!f._fbq)f._fbq=n;n.push=n",
+        "address": "3610 S Cooper St ste 120, Arlington, TX 76015",
+        "additionalInfo": [
+          "\"description\": \"Posh - Get tickets for 817 And Park by Takeover Entertainment LLC - on Fri, Nov 14, 2025 - at Coopers\",",
+          "Early arrival suggested",
+          "Security Enforced",
+          "Presales Available Now"
+        ]
+      }
+    },
+    {
+      "title": "Take Her Thru There🫲🙂‍↕️🫱 | RICH Creatives | Sat, Nov 15, 2025 | Club Rio",
+      "url": "https://posh.vip/e/take-her-thru-there",
+      "normalizedUrl": "https://posh.vip/e/take-her-thru-there",
+      "eventDetails": {
+        "title": "Take Her Thru There",
+        "venue": "Takeover Entertainment LLC",
+        "dateTime": "Sat, Nov 15 at 9:00 PM - 2:00 AM (CST)",
+        "description": "Sat, Nov 15 at 9:00 PM - 2:00 AM\n\nGet Your Take Her Thru There Presales Now!!!\n\nSaturday, November 15th\n\nGirls Just Wanna Have Fun\n\nThe Official UTA Homecoming Party\n\nTeam Takeover Presents X Stokes X Rich\n\n9 pm - 2 am\n\nEarly arrival suggested\n\n3516 E Lancaster Ave,\n\nFort Worth, TX 76103\n\nSecurity Enforced\n\nPresales Available Now\n\nMore events\n\n877 attendees\n\nDiscover Life Offline\n\nScan to download\n\nInstant Ticket Access\n\nEasy Ticket Transfers\n\nCurated For You\n\nTerms of Service\n\nPrivacy Policy\n\nTake Her Thru ThereClub RioSat, Nov 15 at 9:00 PM - 2:00 AM\n\n!function (w, d, t) {\n\n\"@context\": \"https://schema.org\",\n\n\"@type\": \"Event\",\n\n\"name\": \"Take Her Thru There\",\n\n\"startDate\": \"2025-11-15T21:00:00-06:00\",\n\n\"endDate\": \"2025-11-16T02:00:00-06:00\",\n\n\"eventStatus\": \"https://schema.org/EventScheduled\",\n\n\"eventAttendanceMode\": \"https://schema.org/OfflineEventAttendanceMode\",\n\n\"url\": \"https://www.posh.vip/e/take-her-thru-there\",\n\n\"https://posh.vip/cdn-cgi/image/width=1200,height=630,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a8939549f7f4b663391f2\",\n\n\"https://posh.vip/cdn-cgi/image/width=600,height=315,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a8939549f7f4b663391f2\",\n\n\"https://posh.vip/cdn-cgi/image/width=400,height=215,fit=scale-down,format=auto,quality=50/https://posh-images-originals-production.s3.amazonaws.com/690a8939549f7f4b663391f2\"\n\n\"@type\": \"Organization\",\n\n\"name\": \"Takeover Entertainment LLC\",\n\n\"url\": \"https://posh.vip/g/takeoverent\"\n\n\"@type\": \"Place\",\n\n\"name\": \"Club Rio\",\n\n\"@type\": \"PostalAddress\",\n\n\"@type\": \"GeoCoordinates\",\n\n\"latitude\": 32.7404179,\n\n\"longitude\": -97.2732083\n\n\"@type\": \"Offer\",\n\n\"priceCurrency\": \"USD\",\n\n\"availability\": \"https://schema.org/InStock\"\n\nttq.track(\"ViewContent\");\n\nsnaptr(\"track\",\"VIEW_CONTENT\");\n\n!function(f,b,e,v,n,t,s)\n\n{if(f.fbq)return;n=f.fbq=function(){n.callMethod?\n\nn.callMethod.apply(n,arguments):n.queue.push(arguments)};",
+        "address": "3516 E Lancaster Ave, Fort Worth, TX 76103",
+        "additionalInfo": [
+          "\"description\": \"Posh - Get tickets for Take Her Thru There by Takeover Entertainment LLC - on Sat, Nov 15, 2025 - at Club Rio\",",
+          "Early arrival suggested",
+          "Security Enforced",
+          "Presales Available Now"
+        ]
+      }
+    }
+  ]
+}

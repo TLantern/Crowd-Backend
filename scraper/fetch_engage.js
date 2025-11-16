@@ -427,6 +427,7 @@ async function scrapeEventDetail(page, eventHref, fallbackOrgName) {
 
   // Extract location using UNT building list
   let locationName = "";
+  let roomNumber = "";
   const untBuildings = [
     "University Union",
     "Willis Library", 
@@ -495,6 +496,46 @@ async function scrapeEventDetail(page, eventHref, fallbackOrgName) {
       });
     }
 
+    // Extract room number patterns: Room 123, RM 123, Suite 123, etc.
+    // Avoid matching years (like 2025) by requiring context or specific patterns
+    if (locationText) {
+      const roomPatterns = [
+        /(?:Room|RM|room|rm)\s+([A-Z]?\d{1,4}[A-Z]?)/i,
+        /(?:Suite|suite)\s+([A-Z]?\d{1,4}[A-Z]?)/i,
+        /(?:#|No\.?|Number)\s+([A-Z]?\d{1,4}[A-Z]?)/i,
+        /\b([A-Z]\d{2,4}[A-Z]?)\b/, // e.g., A123, B1234 (letter prefix)
+        /\b(\d{1,3}[A-Z])\b/, // e.g., 123A, 45B (letter suffix, avoid 4-digit years)
+        /\b(\d{2,3})\s+(?:Room|RM|room|rm|Suite|suite)\b/i // e.g., "255 Room" or "401 RM"
+      ];
+      
+      for (const pattern of roomPatterns) {
+        const match = locationText.match(pattern);
+        if (match) {
+          const candidate = match[1] || match[0];
+          // Filter out years (4-digit numbers starting with 19 or 20)
+          if (!/^(19|20)\d{2}$/.test(candidate)) {
+            roomNumber = candidate;
+            break;
+          }
+        }
+      }
+      
+      // Also check description for room numbers if not found in locationText
+      if (!roomNumber && description) {
+        for (const pattern of roomPatterns) {
+          const match = description.match(pattern);
+          if (match) {
+            const candidate = match[1] || match[0];
+            // Filter out years (4-digit numbers starting with 19 or 20)
+            if (!/^(19|20)\d{2}$/.test(candidate)) {
+              roomNumber = candidate;
+              break;
+            }
+          }
+        }
+      }
+    }
+
     // Match against UNT building list
     if (locationText) {
       for (const building of untBuildings) {
@@ -550,6 +591,7 @@ async function scrapeEventDetail(page, eventHref, fallbackOrgName) {
     startISO,
     endISO,
     locationName: normalized.locationName,
+    roomNumber: roomNumber || null,
     url: fullUrl
   };
 

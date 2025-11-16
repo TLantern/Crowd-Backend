@@ -123,8 +123,8 @@ function normalizeDescription(htmlDescription) {
 }
 
 async function fetchOfficialEvents14d(page = 1, startDate = null, endDate = null) {
-  // Target: Nov 12 11:59 PM CST = Nov 13 5:59 AM UTC
-  const targetEnd = "2025-11-13";
+  // Target: Nov 21 11:59 PM CST = Nov 22 5:59 AM UTC
+  const targetEnd = "2025-11-22";
   const now = new Date();
   const startDateStr = startDate || now.toISOString().split('T')[0];
   const endDateStr = endDate || targetEnd;
@@ -168,17 +168,19 @@ async function fetchOfficialEvents14d(page = 1, startDate = null, endDate = null
 }
 
 async function run() {
-  const TARGET_DATE = "2025-11-13T05:59:00.000Z"; // Nov 12 11:59 PM CST
+  const TARGET_DATE = "2025-11-22T06:00:00.000Z"; // Nov 22 12:00 AM CST
   
   let allEvents = [];
   
   // Query in date range chunks to avoid 100-event limit
   const dateRanges = [
-    { start: "2025-11-06", end: "2025-11-08" },
-    { start: "2025-11-09", end: "2025-11-10" },
-    { start: "2025-11-10", end: "2025-11-11" },
-    { start: "2025-11-11", end: "2025-11-12" },
-    { start: "2025-11-12", end: "2025-11-13" }
+    { start: "2025-11-11T13:00:00-06:00", end: "2025-11-12T00:00:00-06:00" },
+    { start: "2025-11-12T00:00:00-06:00", end: "2025-11-14T00:00:00-06:00" },
+    { start: "2025-11-14T00:00:00-06:00", end: "2025-11-16T00:00:00-06:00" },
+    { start: "2025-11-16T00:00:00-06:00", end: "2025-11-18T00:00:00-06:00" },
+    { start: "2025-11-18T00:00:00-06:00", end: "2025-11-20T00:00:00-06:00" },
+    { start: "2025-11-20T00:00:00-06:00", end: "2025-11-21T00:00:00-06:00" },
+    { start: "2025-11-21T00:00:00-06:00", end: "2025-11-22T00:00:00-06:00" }
   ];
   
   for (const range of dateRanges) {
@@ -285,7 +287,7 @@ async function run() {
   return { latestDate, reachedTarget: latestDate && latestDate >= TARGET_DATE };
 }
 
-const TARGET_DATE = "2025-11-13T05:59:00.000Z"; // Nov 12 11:59 PM CST
+const TARGET_DATE = "2025-11-22T06:00:00.000Z"; // Nov 22 12:00 AM CST
 
 (async () => {
   try {

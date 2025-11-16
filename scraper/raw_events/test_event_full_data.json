@@ -1,0 +1,177 @@
+{
+  "eventId": "11761713",
+  "url": "https://unt.campuslabs.com/engage/event/11761713",
+  "scrapedAt": "2025-11-16T21:18:38.600Z",
+  "normalized": {
+    "title": "Game Night with AFGM and PWC",
+    "locationName": "University Union",
+    "startTimeLocal": "2025-11-19T18:00:00.000-06:00",
+    "endTimeLocal": "2025-11-19T21:00:00.000-06:00",
+    "sourceType": "engage",
+    "sourceOrg": "these organizations",
+    "sourceUrl": "https://unt.campuslabs.com/engage/event/11761713"
+  },
+  "rawExtracted": {
+    "title": "Game Night with AFGM and PWC",
+    "orgName": "these organizations",
+    "dtRaw": "Wednesday, November 19 2025 at 6:00 PM CST to\n\nWednesday, November 19 2025 at 9:00 PM CST\n\nAdd To Google Calendar | iCal/Outlook",
+    "startISO": "2025-11-19T18:00:00.000-06:00",
+    "endISO": "2025-11-19T21:00:00.000-06:00",
+    "locationName": "University Union",
+    "description": "Wednesday, November 19 2025 at 6:00 PM CST to\n\nWednesday, November 19 2025 at 9:00 PM CST\n\nUniversity Union\n\n1155 Union Cir, Denton, TX\n\nJoin PWC and AFGM for Game Night!\n\nLooking for a fun way to connect and unwind? Come out for an evening of friendly competition and good vibes with PWC and AFGM! We'll have a variety of board games, card games and plenty of laughs to go around. Its the perfect opportunity to relax and enjoy a night of games and great company.",
+    "locationText": "University Union"
+  },
+  "comprehensiveData": {
+    "url": "https://unt.campuslabs.com/engage/event/11761713",
+    "title": "Game Night with AFGM and PWC",
+    "headings": [
+      {
+        "level": "H1",
+        "text": "Game Night with AFGM and PWC"
+      },
+      {
+        "level": "H2",
+        "text": "Description"
+      },
+      {
+        "level": "H2",
+        "text": "Perks"
+      },
+      {
+        "level": "H2",
+        "text": "Categories"
+      },
+      {
+        "level": "H2",
+        "text": "RSVP to Event"
+      },
+      {
+        "level": "H2",
+        "text": "Host Organizations"
+      },
+      {
+        "level": "H3",
+        "text": "Professional Women's Council"
+      },
+      {
+        "level": "H3",
+        "text": "A Few Good Men"
+      },
+      {
+        "level": "H2",
+        "text": "Other events hosted by these organizations"
+      },
+      {
+        "level": "H3",
+        "text": "A Few Good Men - General Body Meeting"
+      },
+      {
+        "level": "H3",
+        "text": "Professional Women's Council: Woke Women's Wednesday - Mingle & Jingle Christmas Edition"
+      }
+    ],
+    "paragraphs": [
+      "Wednesday, November 19 2025 at 6:00 PM CST to",
+      "Wednesday, November 19 2025 at 9:00 PM CST",
+      "University Union",
+      "1155 Union Cir, Denton, TX",
+      "Join PWC and AFGM for Game Night!",
+      "Looking for a fun way to connect and unwind? Come out for an evening of friendly competition and good vibes with PWC and AFGM! We'll have a variety of board games, card games and plenty of laughs to go around. Its the perfect opportunity to relax and enjoy a night of games and great company."
+    ],
+    "links": [
+      {
+        "text": "Google Calendar",
+        "href": "/engage/event/11761713/googlepublish",
+        "isOrgLink": false
+      },
+      {
+        "text": "iCal/Outlook",
+        "href": "/engage/event/11761713.ics",
+        "isOrgLink": false
+      },
+      {
+        "text": "View Map",
+        "href": "https://www.google.com/maps/place/1155 Union Cir, Denton, TX",
+        "isOrgLink": false
+      },
+      {
+        "text": "SIGN IN TO RSVP",
+        "href": "/engage/account/login?returnUrl=/engage/event/11761713",
+        "isOrgLink": false
+      },
+      {
+        "text": "Professional Women's Council",
+        "href": "/engage/organization/professionalwomenscouncil",
+        "isOrgLink": true
+      },
+      {
+        "text": "A Few Good Men",
+        "href": "/engage/organization/afgm",
+        "isOrgLink": true
+      },
+      {
+        "text": "A Few Good Men - General Body Meeting\nThursday, November 20 at 6:00PM CST\nUniversity Union, Room 401\nA Few Good Men",
+        "href": "/engage/event/11692451",
+        "isOrgLink": false
+      },
+      {
+        "text": "Professional Women's Council: Woke Women's Wednesday - Mingle & Jingle Christmas Edition\nTuesday, December 2 at 6:00PM CST\nTerrill Hall, 121\nProfessional Women's Council",
+        "href": "/engage/event/11750843",
+        "isOrgLink": false
+      }
+    ],
+    "images": [
+      {
+        "src": "https://static.campuslabsengage.com/discovery/images/free_food.svg",
+        "alt": "Small icon of pizza to represent food in general",
+        "width": 150,
+        "height": 150
+      },
+      {
+        "src": "https://se-images.campuslabs.com/clink/images/62a345e4-56ad-4330-915f-6cf322104aa5ec792e4c-a0d3-4d0d-b670-cfc99fee59fb.png?preset=small-sq",
+        "alt": "",
+        "width": 75,
+        "height": 75
+      },
+      {
+        "src": "https://se-images.campuslabs.com/clink/images/a8756818-468a-4931-9c4b-b0486442ec5f41b8efb5-a70c-485e-89db-b45f0c2895d8.png?preset=small-sq",
+        "alt": "",
+        "width": 75,
+        "height": 75
+      },
+      {
+        "src": "https://se-images.campuslabs.com/clink/images/a8756818-468a-4931-9c4b-b0486442ec5f41b8efb5-a70c-485e-89db-b45f0c2895d8.png?preset=small-sq",
+        "alt": "A Few Good Men",
+        "width": 75,
+        "height": 75
+      },
+      {
+        "src": "https://se-images.campuslabs.com/clink/images/62a345e4-56ad-4330-915f-6cf322104aa5ec792e4c-a0d3-4d0d-b670-cfc99fee59fb.png?preset=small-sq",
+        "alt": "Professional Women's Council",
+        "width": 75,
+        "height": 75
+      }
+    ],
+    "buttons": [],
+    "metadata": {
+      "viewport": "width=device-width, initial-scale=1",
+      "description": "Discover unique opportunities at! Find and attend events, browse and join organizations, and showcase your involvement.",
+      "msapplication-config": "/engage/icons/browserconfig.xml?v=zXryopmz8G",
+      "theme-color": "#ffffff",
+      "og:title": "Game Night with AFGM and PWC",
+      "og:type": "website",
+      "og:image": "https://static.campuslabsengage.com/discovery/images/events/social.jpg",
+      "og:description": "<p><em><strong>Join PWC and AFGM for Game Night!</strong></em></p>\r\n<p>&nbsp;</p>\r\n<p>Looking for a fun way to connect and unwind? Come out for an evening of friendly competition and good vibes with PWC and AFGM! We'll have a variety of board games, card games and plenty of laughs to go around. Its the perfect opportunity to relax and enjoy a night of games and great company.</p>"
+    },
+    "structuredData": [],
+    "allText": "Game Night with AFGM and PWC\nDate and Time\n\nWednesday, November 19 2025 at 6:00 PM CST to\n\nWednesday, November 19 2025 at 9:00 PM CST\n\nAdd To Google Calendar | iCal/Outlook\nLocation\n\nUniversity Union\n\n1155 Union Cir, Denton, TX\n\nView Map\nDescription\n\nJoin PWC and AFGM for Game Night!\n\n \n\nLooking for a fun way to connect and unwind? Come out for an evening of friendly competition and good vibes with PWC and AFGM! We'll have a variety of board games, card games and plenty of laughs to go around. Its the perfect opportunity to relax and enjoy a night of games and great company.\n\nPerks\n Free Food\nCategories\nSocial and Networking\nRSVP to Event\nSIGN IN TO RSVP\nHost Organizations\nProfessional Women's Council\nA Few Good Men\nOther events hosted by these organizations\nA Few Good Men - General Body Meeting\nThursday, November 20 at 6:00PM CST\nUniversity Union, Room 401\nA Few Good Men\nProfessional Women's Council: Woke Women's Wednesday - Mingle & Jingle Christmas Edition\nTuesday, December 2 at 6:00PM CST\nTerrill Hall, 121\nProfessional Women's Council",
+    "orgInfo": {
+      "name": "Professional Women's Council",
+      "url": "/engage/organization/professionalwomenscouncil",
+      "hostText": "Game Night with AFGM and PWC\nDate and Time\n\nWednesday, November 19 2025 at 6:00 PM CST to\n\nWednesday, November 19 2025 at 9:00 PM CST\n\nAdd To Google Calendar | iCal/Outlook\nLocation\n\nUniversity Union\n\n1155 Union Cir, Denton, TX\n\nView Map\nDescription\n\nJoin PWC and AFGM for Game Night!\n\n \n\nLooking for a fun way to connect and unwind? Come out for an evening of friendly competition and good vibes with PWC and AFGM! We'll have a variety of board games, card games and plenty of laughs to go around. Its the perfect opportunity to relax and enjoy a night of games and great company.\n\nPerks\n Free Food\nCategories\nSocial and Networking\nRSVP to Event\nSIGN IN TO RSVP\nHost Organizations\nProfessional Women's Council\nA Few Good Men\nOther events hosted by these organizations\nA Few Good Men - General Body Meeting\nThursday, November 20 at 6:00PM CST\nUniversity Union, Room 401\nA Few Good Men\nProfessional Women's Council: Woke Women's Wednesday - Mingle & Jingle Christmas Edition\nTuesday, December 2 at 6:00PM CST\nTerrill Hall, 121\nProfessional Women's Council"
+    },
+    "dateTimeInfo": "Wednesday, November 19 2025 at 6:00 PM CST to\n\nWednesday, November 19 2025 at 9:00 PM CST\n\nAdd To Google Calendar | iCal/Outlook",
+    "locationInfo": "University Union",
+    "descriptionInfo": null
+  }
+}

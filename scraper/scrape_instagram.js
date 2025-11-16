@@ -10,16 +10,16 @@ import { chromium } from "@playwright/test";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { rsleep } from "./utils.js";
 import { parseCaption } from "./parseCaption.js";
-import {
-  db,
-  writeInstagramRaw,
-  writeNormalizedEvent
-} from "./firestore.js";
+// import {
+//   db,
+//   writeInstagramRaw,
+//   writeNormalizedEvent
+// } from "./firestore.js";
 
 // CONFIG
 const TARGET_HANDLES = [
-  "tenoftenent",
-  "rich.creatives"
+  "rich.creatives",
+  "tenoftenent"
 ];
 const MAX_POSTS_PER_HANDLE = 5;
 const IG_BASE = "https://www.instagram.com/";
@@ -201,37 +201,22 @@ async function scrapeHandle(page, handle) {
       sourceUrl: postUrl
     };
 
-    // store raw for audit
-    try {
-      await writeInstagramRaw(postId, {
-        orgHandle: handle,
-        postUrl,
-        rawCaption,
-        timestampISO,
-        parsed
-      });
-      console.log(`Successfully saved raw data for post ${postId}`);
-    } catch (error) {
-      console.log(`Failed to save raw data for post ${postId}: ${error.message}`);
-    }
-
-    // store normalized to campus_events_live
-    try {
-      await writeNormalizedEvent(
-        {
-          ...normalized
-        },
-        parsed.confidence
-      );
-      console.log(`Successfully saved normalized event for post ${postId}`);
-    } catch (error) {
-      console.log(`Failed to save normalized event for post ${postId}: ${error.message}`);
-    }
+    // Save to results array instead of Firestore (for debugging)
+    const rawData = {
+      orgHandle: handle,
+      postUrl,
+      rawCaption,
+      timestampISO,
+      parsed
+    };
 
     results.push({
       postId,
-      ...normalized,
-      confidence: parsed.confidence
+      rawData,
+      normalized: {
+        ...normalized,
+        confidence: parsed.confidence
+      }
     });
 
     await rsleep(3000, 6000);
@@ -246,9 +231,15 @@ async function scrapeHandle(page, handle) {
   });
 
   const context = await browser.newContext({
-    viewport: { width: 1280, height: 800 },
+    viewport: { width: 1920, height: 1080 },
     userAgent:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari"
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    locale: "en-US",
+    timezoneId: "America/Chicago",
+    deviceScaleFactor: 1,
+    hasTouch: false,
+    isMobile: false,
+    colorScheme: "light"
   });
 
   await loadCookies(context);
@@ -307,16 +298,29 @@ async function scrapeHandle(page, handle) {
   await saveCookies(context);
   await browser.close();
 
+  // Save all results to JSON file for debugging
+  const outputFile = `instagram_scrape_${new Date().toISOString().split('T')[0]}.json`;
+  const outputData = {
+    scrapedAt: new Date().toISOString(),
+    scrapedCount: allResults.length,
+    results: allResults,
+    summary: allResults.map((x) => ({
+      postId: x.postId,
+      title: x.normalized.title,
+      when: x.normalized.startTimeLocal,
+      loc: x.normalized.locationName,
+      src: x.normalized.sourceOrg,
+      confidence: x.normalized.confidence
+    }))
+  };
+  
+  writeFileSync(outputFile, JSON.stringify(outputData, null, 2), "utf8");
+  console.log(`\n✅ Saved ${allResults.length} scraped posts to ${outputFile}`);
   console.log(
     JSON.stringify(
       {
         scrapedCount: allResults.length,
-        events: allResults.map((x) => ({
-          title: x.title,
-          when: x.startTimeLocal,
-          loc: x.locationName,
-          src: x.sourceOrg
-        }))
+        events: outputData.summary
       },
       null,
       2
