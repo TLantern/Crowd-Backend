@@ -14,14 +14,14 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      storageBucket: "crowd-6193c.appspot.com"
+      storageBucket: "crowd-6193c.firebasestorage.app"
     });
     console.log("🔑 Using service account key authentication");
   } else {
     // Fall back to application default credentials (Firebase CLI login)
     admin.initializeApp({
       projectId: "crowd-6193c",
-      storageBucket: "crowd-6193c.appspot.com"
+      storageBucket: "crowd-6193c.firebasestorage.app"
     });
     console.log("🔑 Using application default credentials (Firebase CLI)");
   }
