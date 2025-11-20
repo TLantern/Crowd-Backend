@@ -8,6 +8,8 @@
     "scrape:linktree": "node scrape_linktree.js",
     "upload:linktree": "node upload_linktree_to_firebase.js",
     "linktree:daily": "node linktree_daily_pipeline.js",
+    "linktree:cleanup": "node cleanup_duplicates_and_past.js",
+    "linktree:cleanup-now": "node cleanup_now.js",
     "fetch:official": "node fetch_official.js",
     "fetch:engage": "node fetch_engage.js",
     "cleanup": "node cleanup.js",
