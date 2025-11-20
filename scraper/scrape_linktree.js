@@ -3,7 +3,11 @@
 
 import { chromium } from "@playwright/test";
 import { writeFileSync } from "fs";
-import { rsleep } from "./utils.js";
+import { rsleep, canonicalIdForEvent, shouldKeepEvent } from "./utils.js";
+import { writeNormalizedEvent, writeLinktreeRaw, db } from "./firestore.js";
+import { DateTime } from "luxon";
+
+const TZ = "America/Chicago";
 
 // Date detection patterns - looking for month names, day numbers, and years
 const DATE_PATTERNS = [
@@ -22,6 +26,139 @@ const DATE_PATTERNS = [
 function hasDate(text) {
   if (!text) return false;
   return DATE_PATTERNS.some(pattern => pattern.test(text));
+}
+
+// Parse posh.vip date/time strings to ISO format
+// Handles formats like "Sat, Nov 15 at 9:00 PM - 2:00 AM (CST)"
+function parsePoshDateTime(dateTimeStr) {
+  if (!dateTimeStr) return { startISO: null, endISO: null };
+
+  const cleanText = dateTimeStr.replace(/\s+/g, ' ').trim();
+  
+  // Pattern: "Sat, Nov 15 at 9:00 PM - 2:00 AM (CST)"
+  const rangePattern = /([A-Za-z]{3}),?\s+([A-Za-z]{3})\s+(\d{1,2})(?:st|nd|rd|th)?\s+at\s+(\d{1,2}):(\d{2})\s+(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s+(AM|PM)/i;
+  const rangeMatch = cleanText.match(rangePattern);
+  
+  if (rangeMatch) {
+    const [, , month, day, startHour, startMin, startPeriod, endHour, endMin, endPeriod] = rangeMatch;
+    
+    // Get current year, assume same year unless date has passed
+    const now = DateTime.now().setZone(TZ);
+    const currentYear = now.year;
+    
+    const months = {
+      jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+      jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12
+    };
+    
+    const monthNum = months[month.toLowerCase().substring(0, 3)];
+    if (!monthNum) return { startISO: null, endISO: null };
+    
+    let startH = parseInt(startHour, 10);
+    const startM = parseInt(startMin, 10);
+    if (startPeriod.toLowerCase() === 'pm' && startH < 12) startH += 12;
+    if (startPeriod.toLowerCase() === 'am' && startH === 12) startH = 0;
+    
+    let endH = parseInt(endHour, 10);
+    const endM = parseInt(endMin, 10);
+    if (endPeriod.toLowerCase() === 'pm' && endH < 12) endH += 12;
+    if (endPeriod.toLowerCase() === 'am' && endH === 12) endH = 0;
+    
+    // If end time is before start time, it's next day
+    let endDay = parseInt(day, 10);
+    if (endH < startH || (endH === startH && endM < startM)) {
+      endDay += 1;
+    }
+    
+    try {
+      let startDT = DateTime.fromObject({
+        year: currentYear,
+        month: monthNum,
+        day: parseInt(day, 10),
+        hour: startH,
+        minute: startM
+      }, { zone: TZ });
+      
+      // If date has passed this year, try next year
+      if (startDT < now) {
+        startDT = startDT.plus({ years: 1 });
+      }
+      
+      let endDT = DateTime.fromObject({
+        year: startDT.year,
+        month: monthNum,
+        day: endDay,
+        hour: endH,
+        minute: endM
+      }, { zone: TZ });
+      
+      // Adjust end date if it's before start
+      if (endDT < startDT) {
+        endDT = endDT.plus({ days: 1 });
+      }
+      
+      return {
+        startISO: startDT.isValid ? startDT.toISO() : null,
+        endISO: endDT.isValid ? endDT.toISO() : null
+      };
+    } catch (error) {
+      console.log(`Date parsing error: ${error.message}`);
+      return { startISO: null, endISO: null };
+    }
+  }
+  
+  // Try simpler pattern: "Sat, Nov 15 at 9:00 PM"
+  const singlePattern = /([A-Za-z]{3}),?\s+([A-Za-z]{3})\s+(\d{1,2})(?:st|nd|rd|th)?\s+at\s+(\d{1,2}):(\d{2})\s+(AM|PM)/i;
+  const singleMatch = cleanText.match(singlePattern);
+  
+  if (singleMatch) {
+    const [, , month, day, hour, min, period] = singleMatch;
+    const now = DateTime.now().setZone(TZ);
+    const currentYear = now.year;
+    
+    const months = {
+      jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+      jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12
+    };
+    
+    const monthNum = months[month.toLowerCase().substring(0, 3)];
+    if (!monthNum) return { startISO: null, endISO: null };
+    
+    let h = parseInt(hour, 10);
+    const m = parseInt(min, 10);
+    if (period.toLowerCase() === 'pm' && h < 12) h += 12;
+    if (period.toLowerCase() === 'am' && h === 12) h = 0;
+    
+    try {
+      let startDT = DateTime.fromObject({
+        year: currentYear,
+        month: monthNum,
+        day: parseInt(day, 10),
+        hour: h,
+        minute: m
+      }, { zone: TZ });
+      
+      if (startDT < now) {
+        startDT = startDT.plus({ years: 1 });
+      }
+      
+      return {
+        startISO: startDT.isValid ? startDT.toISO() : null,
+        endISO: null
+      };
+    } catch (error) {
+      return { startISO: null, endISO: null };
+    }
+  }
+  
+  return { startISO: null, endISO: null };
+}
+
+// Check if event already exists in Firestore
+async function eventExists(normalized) {
+  const id = canonicalIdForEvent(normalized);
+  const doc = await db.collection("campus_events_live").doc(id).get();
+  return doc.exists;
 }
 
 async function scrapePoshEvent(page, url) {
@@ -52,6 +189,7 @@ async function scrapePoshEvent(page, url) {
         dateTime: null,
         description: null,
         address: null,
+        imageUrl: null,
         additionalInfo: []
       };
 
@@ -201,6 +339,104 @@ async function scrapePoshEvent(page, url) {
       
       data.description = descriptionParts.join('\n\n').substring(0, 2000);
 
+      // Extract image URL - posh.vip specific
+      // 1. Look for posh.vip event hero images - prefer cdn-cgi/image URLs
+      const poshImages = Array.from(document.querySelectorAll('img[src*="posh.vip"], img[srcset*="posh"], img[src*="posh-images"]'));
+      for (const img of poshImages) {
+        // First check src attribute - it usually has the full URL
+        let src = img.src || img.getAttribute('src');
+        if (src && src.includes('cdn-cgi/image')) {
+          // Ensure full URL
+          if (src.startsWith('//')) {
+            src = 'https:' + src;
+          }
+          data.imageUrl = src;
+          break;
+        }
+        
+        // Check srcset for cdn-cgi/image URL
+        const srcset = img.getAttribute('srcset');
+        if (srcset) {
+          const srcsetEntries = srcset.split(',').map(s => s.trim());
+          // Look for cdn-cgi/image URL (preferred)
+          for (const entry of srcsetEntries) {
+            // Extract URL - everything before the descriptor (space + number/width)
+            // Format: "url 640w" or "url 2x"
+            const parts = entry.split(/\s+/);
+            let url = parts[0];
+            
+            // If URL doesn't start with http, it might be relative or have a prefix
+            if (!url.startsWith('http')) {
+              // Check if there's an https:// later in the entry
+              const httpsMatch = entry.match(/https?:\/\/[^\s]+/);
+              if (httpsMatch) {
+                url = httpsMatch[0];
+              } else {
+                // Try to construct full URL
+                if (url.startsWith('//')) {
+                  url = 'https:' + url;
+                } else if (url.includes('posh.vip')) {
+                  url = 'https://' + url.replace(/^[^\/]*\//, '');
+                }
+              }
+            }
+            
+            // Prefer cdn-cgi/image URLs - ensure we have the full URL
+            if (url && url.includes('cdn-cgi/image') && url.startsWith('http')) {
+              data.imageUrl = url;
+              break;
+            }
+          }
+        }
+        
+        // Fallback: use src if it's a posh.vip URL
+        if (!data.imageUrl && src) {
+          if (src.startsWith('//')) {
+            src = 'https:' + src;
+          } else if (!src.startsWith('http') && src.includes('posh.vip')) {
+            src = 'https://' + src.replace(/^[^\/]*\//, '');
+          }
+          if (src && src.includes('posh.vip')) {
+            data.imageUrl = src;
+            break;
+          }
+        }
+        
+        if (data.imageUrl) break;
+      }
+      
+      // 3. Open Graph image (fallback)
+      if (!data.imageUrl) {
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) {
+          data.imageUrl = ogImage.getAttribute('content');
+        }
+      }
+      
+      // 4. Twitter card image (fallback)
+      if (!data.imageUrl) {
+        const twitterImage = document.querySelector('meta[name="twitter:image"], meta[property="twitter:image"]');
+        if (twitterImage) {
+          data.imageUrl = twitterImage.getAttribute('content');
+        }
+      }
+      
+      // 5. Look for other large images as last resort
+      if (!data.imageUrl) {
+        const images = Array.from(document.querySelectorAll('img[src]'));
+        for (const img of images) {
+          const src = img.src || img.getAttribute('src');
+          if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar')) {
+            const width = img.naturalWidth || img.width || 0;
+            const height = img.naturalHeight || img.height || 0;
+            if (width > 200 && height > 200) {
+              data.imageUrl = src;
+              break;
+            }
+          }
+        }
+      }
+
       // Collect additional info lines
       const infoKeywords = [
         'presale', 'presales', 'security', 'enforced', 'early arrival',
@@ -256,6 +492,7 @@ async function scrapePoshEvent(page, url) {
     console.log(`  ✓ Title: ${eventData.title || 'Not found'}`);
     console.log(`  ✓ Venue: ${eventData.venue || 'Not found'}`);
     console.log(`  ✓ Date/Time: ${eventData.dateTime || 'Not found'}`);
+    console.log(`  ✓ Image: ${eventData.imageUrl || 'Not found'}`);
     
     return eventData;
 
@@ -267,32 +504,289 @@ async function scrapePoshEvent(page, url) {
       dateTime: null,
       description: null,
       address: null,
+      imageUrl: null,
       additionalInfo: [],
       error: error.message
     };
   }
 }
 
-async function scrapeLinktree(url) {
+async function scrapeEventbrite(page, url) {
+  console.log(`\n📋 Scraping Eventbrite page: ${url}`);
+  
+  try {
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await rsleep(2000, 3000);
+
+    const eventData = await page.evaluate(() => {
+      const data = {
+        title: null,
+        venue: null,
+        dateTime: null,
+        description: null,
+        address: null,
+        imageUrl: null,
+        additionalInfo: []
+      };
+
+      // Get title - usually in h1
+      const titleEl = document.querySelector('h1');
+      if (titleEl) {
+        data.title = titleEl.textContent?.trim();
+      }
+
+      // Get venue - look for location info
+      const venueSelectors = [
+        '[data-testid="venue-name"]',
+        '[class*="venue"]',
+        '[class*="location"]',
+        'address'
+      ];
+      
+      for (const selector of venueSelectors) {
+        const el = document.querySelector(selector);
+        if (el) {
+          const text = el.textContent?.trim();
+          if (text && text.length < 200) {
+            data.venue = text;
+            break;
+          }
+        }
+      }
+
+      // Get date/time - Eventbrite usually has structured date/time
+      const dateTimeSelectors = [
+        '[data-testid="event-date"]',
+        '[class*="date"]',
+        '[class*="time"]',
+        'time[datetime]'
+      ];
+      
+      for (const selector of dateTimeSelectors) {
+        const el = document.querySelector(selector);
+        if (el) {
+          const text = el.textContent?.trim();
+          const datetime = el.getAttribute('datetime');
+          if (datetime) {
+            data.dateTime = datetime;
+            break;
+          } else if (text && text.length < 200) {
+            data.dateTime = text;
+            break;
+          }
+        }
+      }
+
+      // Get description
+      const descSelectors = [
+        '[data-testid="event-description"]',
+        '[class*="description"]',
+        '[class*="overview"]'
+      ];
+      
+      for (const selector of descSelectors) {
+        const el = document.querySelector(selector);
+        if (el) {
+          const text = el.textContent?.trim();
+          if (text && text.length > 10) {
+            data.description = text.substring(0, 2000);
+            break;
+          }
+        }
+      }
+
+      // Get address
+      const addressEl = document.querySelector('address, [class*="address"]');
+      if (addressEl) {
+        data.address = addressEl.textContent?.trim();
+      }
+
+      // Extract image URL - Eventbrite specific
+      // 1. Look for hero image with data-testid="hero-img"
+      const heroImg = document.querySelector('img[data-testid="hero-img"]');
+      if (heroImg) {
+        const src = heroImg.src || heroImg.getAttribute('src');
+        if (src && src.includes('evbuc.com')) {
+          data.imageUrl = src;
+        }
+      }
+      
+      // 2. Look for event image container with data-testid="event-image"
+      if (!data.imageUrl) {
+        const eventImageContainer = document.querySelector('[data-testid="event-image"]');
+        if (eventImageContainer) {
+          const img = eventImageContainer.querySelector('img');
+          if (img) {
+            const src = img.src || img.getAttribute('src');
+            if (src && src.includes('evbuc.com')) {
+              data.imageUrl = src;
+            }
+          }
+        }
+      }
+      
+      // 3. Look for any img with evbuc.com URL (Eventbrite CDN)
+      if (!data.imageUrl) {
+        const images = Array.from(document.querySelectorAll('img[src*="evbuc.com"]'));
+        for (const img of images) {
+          const src = img.src || img.getAttribute('src');
+          if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar')) {
+            const width = img.naturalWidth || img.width || 0;
+            const height = img.naturalHeight || img.height || 0;
+            if (width > 200 && height > 200) {
+              data.imageUrl = src;
+              break;
+            }
+          }
+        }
+      }
+      
+      // 4. Open Graph image (fallback)
+      if (!data.imageUrl) {
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) {
+          data.imageUrl = ogImage.getAttribute('content');
+        }
+      }
+      
+      // 5. Twitter card image (fallback)
+      if (!data.imageUrl) {
+        const twitterImage = document.querySelector('meta[name="twitter:image"], meta[property="twitter:image"]');
+        if (twitterImage) {
+          data.imageUrl = twitterImage.getAttribute('content');
+        }
+      }
+      
+      // 6. Look for other large images as last resort
+      if (!data.imageUrl) {
+        const images = Array.from(document.querySelectorAll('img[src]'));
+        for (const img of images) {
+          const src = img.src || img.getAttribute('src');
+          if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar')) {
+            const width = img.naturalWidth || img.width || 0;
+            const height = img.naturalHeight || img.height || 0;
+            if (width > 200 && height > 200) {
+              data.imageUrl = src;
+              break;
+            }
+          }
+        }
+      }
+
+      return data;
+    });
+
+    console.log(`  ✓ Title: ${eventData.title || 'Not found'}`);
+    console.log(`  ✓ Venue: ${eventData.venue || 'Not found'}`);
+    console.log(`  ✓ Date/Time: ${eventData.dateTime || 'Not found'}`);
+    console.log(`  ✓ Image: ${eventData.imageUrl || 'Not found'}`);
+    
+    return eventData;
+
+  } catch (error) {
+    console.error(`  ✗ Error scraping Eventbrite ${url}:`, error.message);
+    return {
+      title: null,
+      venue: null,
+      dateTime: null,
+      description: null,
+      address: null,
+      imageUrl: null,
+      additionalInfo: [],
+      error: error.message
+    };
+  }
+}
+
+async function scrapePoshGroup(page, url) {
+  console.log(`\n📋 Scraping posh.vip group page: ${url}`);
+  
+  try {
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await rsleep(2000, 3000);
+
+    // Extract all event links from the group page AND check titles/headings
+    const eventLinks = await page.evaluate(() => {
+      const links = [];
+      const seenUrls = new Set();
+
+      // Get page title and headings for date checking
+      const pageTitle = document.title || '';
+      const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')).map(h => h.textContent?.trim() || '');
+
+      // Find all links that might be event pages
+      const allLinks = document.querySelectorAll('a[href]');
+      
+      for (const link of allLinks) {
+        const href = link.href || link.getAttribute('href');
+        if (href && href.includes('posh.vip') && !href.includes('/g/')) {
+          // Skip group pages, only get individual event pages
+          const normalizedUrl = new URL(href).origin + new URL(href).pathname;
+          
+          if (!seenUrls.has(normalizedUrl) && normalizedUrl !== window.location.href) {
+            const text = link.textContent?.trim() || link.innerText?.trim() || '';
+            links.push({
+              text: text,
+              href: normalizedUrl,
+              pageTitle: pageTitle,
+              headings: headings
+            });
+            seenUrls.add(normalizedUrl);
+          }
+        }
+      }
+
+      return links;
+    });
+
+    console.log(`  Found ${eventLinks.length} event links on group page`);
+
+    // Pull ALL events (no date filtering)
+    const upcomingEvents = eventLinks.map(link => ({
+      title: link.text,
+      url: link.href,
+      normalizedUrl: link.href
+    }));
+
+    console.log(`  Processing ${upcomingEvents.length} events (all events, no date filter)`);
+
+    // Sort by date if possible, or just return in order found
+    return upcomingEvents;
+
+  } catch (error) {
+    console.error(`  ✗ Error scraping posh.vip group ${url}:`, error.message);
+    return [];
+  }
+}
+
+async function scrapeLinktree(url, page) {
   console.log(`🌐 Navigating to ${url}...`);
   
-  const browser = await chromium.launch({
-    headless: false
-  });
+  // If no page provided, create a new browser instance
+  let browser = null;
+  let context = null;
+  let shouldCloseBrowser = false;
+  
+  if (!page) {
+    browser = await chromium.launch({
+      headless: false
+    });
 
-  const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 },
-    userAgent:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    locale: "en-US",
-    timezoneId: "America/Chicago",
-    deviceScaleFactor: 1,
-    hasTouch: false,
-    isMobile: false,
-    colorScheme: "light"
-  });
+    context = await browser.newContext({
+      viewport: { width: 1920, height: 1080 },
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      locale: "en-US",
+      timezoneId: "America/Chicago",
+      deviceScaleFactor: 1,
+      hasTouch: false,
+      isMobile: false,
+      colorScheme: "light"
+    });
 
-  const page = await context.newPage();
+    page = await context.newPage();
+    shouldCloseBrowser = true;
+  }
 
   try {
     await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
@@ -305,11 +799,15 @@ async function scrapeLinktree(url) {
       console.log("⚠️  No links found with default selector, trying alternatives...");
     });
 
-    // Get all links/buttons on the page
+    // Get all links/buttons on the page AND check titles/headings for dates
     // Linktree typically uses buttons or anchor tags
     const linksWithDates = await page.evaluate(() => {
       const results = [];
       const seenUrls = new Set();
+
+      // First, check page title and headings for dates
+      const pageTitle = document.title || '';
+      const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')).map(h => h.textContent?.trim() || '');
 
       // Try multiple selectors for Linktree buttons/links
       const selectors = [
@@ -351,7 +849,9 @@ async function scrapeLinktree(url) {
           if (href && text && !seenUrls.has(href)) {
             results.push({
               text: text,
-              href: href
+              href: href,
+              pageTitle: pageTitle,
+              headings: headings
             });
             seenUrls.add(href);
           }
@@ -363,11 +863,10 @@ async function scrapeLinktree(url) {
 
     console.log(`Found ${linksWithDates.length} total links/buttons`);
 
-    // Filter to only those with dates in their text
-    const datePattern = new RegExp(DATE_PATTERNS.map(p => p.source).join('|'), 'i');
-    const filteredLinks = linksWithDates.filter(link => hasDate(link.text));
+    // Pull ALL links (no date filtering)
+    const filteredLinks = linksWithDates;
     
-    console.log(`Found ${filteredLinks.length} links with dates in titles`);
+    console.log(`Processing ${filteredLinks.length} links (all links, no date filter)`);
 
     // Remove duplicates by URL
     const uniqueLinks = [];
@@ -387,7 +886,7 @@ async function scrapeLinktree(url) {
       }
     }
 
-    console.log(`\n✅ Found ${uniqueLinks.length} unique links with dates:`);
+    console.log(`\n✅ Found ${uniqueLinks.length} unique links:`);
     uniqueLinks.forEach((link, idx) => {
       console.log(`${idx + 1}. ${link.title}`);
       console.log(`   ${link.url}\n`);
@@ -404,10 +903,76 @@ async function scrapeLinktree(url) {
       // Only scrape posh.vip links
       if (link.url.includes('posh.vip')) {
         const eventDetails = await scrapePoshEvent(page, link.url);
-        eventsWithDetails.push({
-          ...link,
-          eventDetails: eventDetails
-        });
+        
+        // Parse date/time to ISO format
+        const { startISO, endISO } = parsePoshDateTime(eventDetails.dateTime);
+        
+        // Build normalized event
+        const normalized = {
+          title: eventDetails.title || link.title,
+          locationName: eventDetails.venue || null,
+          startTimeLocal: startISO,
+          endTimeLocal: endISO,
+          sourceType: "linktree",
+          sourceOrg: "Linktree Event",
+          sourceUrl: link.url,
+          description: eventDetails.description || null,
+          address: eventDetails.address || null,
+          imageUrl: eventDetails.imageUrl || null
+        };
+        
+        // Extract eventId from URL
+        const urlParts = link.url.split("/").filter(Boolean);
+        const eventId = urlParts[urlParts.length - 1] || link.url;
+        
+        // Always write raw event data (for audit/debug purposes)
+        try {
+          await writeLinktreeRaw(eventId, {
+            eventId,
+            url: link.url,
+            title: link.title,
+            eventDetails: eventDetails,
+            normalized: normalized,
+            scrapedAt: new Date().toISOString()
+          });
+          console.log(`  📝 Raw data saved to events_from_linktree_raw`);
+        } catch (error) {
+          console.error(`  ❌ Error saving raw data: ${error.message}`);
+        }
+        
+        // Check for duplicates before writing normalized event
+        const exists = await eventExists(normalized);
+        if (exists) {
+          console.log(`  ⏭️  Skipping duplicate normalized event`);
+          eventsWithDetails.push({
+            ...link,
+            eventDetails: eventDetails,
+            normalized: normalized,
+            skipped: true,
+            reason: 'duplicate'
+          });
+        } else {
+          // Write normalized event
+          try {
+            await writeNormalizedEvent(normalized, 1.0);
+            console.log(`  ✅ Normalized event saved to Firestore`);
+            eventsWithDetails.push({
+              ...link,
+              eventDetails: eventDetails,
+              normalized: normalized,
+              saved: true
+            });
+          } catch (error) {
+            console.error(`  ❌ Error saving normalized event: ${error.message}`);
+            eventsWithDetails.push({
+              ...link,
+              eventDetails: eventDetails,
+              normalized: normalized,
+              saved: false,
+              error: error.message
+            });
+          }
+        }
       } else {
         console.log(`  ⏭️  Skipping non-posh.vip link`);
         eventsWithDetails.push({
@@ -436,23 +1001,418 @@ async function scrapeLinktree(url) {
     writeFileSync(outputFile, JSON.stringify(outputData, null, 2), "utf8");
     console.log(`\n💾 Saved results to ${outputFile}`);
 
-    await browser.close();
+    if (shouldCloseBrowser && browser) {
+      await browser.close();
+    }
     return eventsWithDetails;
 
   } catch (error) {
     console.error("Error scraping Linktree:", error);
-    await browser.close();
+    if (shouldCloseBrowser && browser) {
+      await browser.close();
+    }
     throw error;
   }
 }
 
-// Run the scraper
-const LINKTREE_URL = "https://linktr.ee/richcreatives";
+// Run the scraper with multiple Linktree URLs and posh.vip group pages
+export const LINKTREE_URLS = [
+  "https://linktr.ee/richcreatives",
+  "https://linktr.ee/dallaspoolparty",
+  "https://linktr.ee/thecliqpromos"
+];
 
-scrapeLinktree(LINKTREE_URL)
+export const POSH_GROUP_URLS = [
+  "https://posh.vip/g/quality-crazy-promotions-2"
+];
+
+export const DIRECT_EVENT_URLS = [
+  "https://www.eventbrite.com/e/countdown-in-the-sky-nye-2026-dallas-tickets-1964572377867?aff=oddtdtcreator",
+  "https://posh.vip/e/whos-on-top-pt-2"
+];
+
+// Parse Eventbrite date/time to ISO format
+function parseEventbriteDateTime(dateTimeStr) {
+  if (!dateTimeStr) return { startISO: null, endISO: null };
+  
+  // Try ISO format first (if it's already ISO)
+  try {
+    const dt = DateTime.fromISO(dateTimeStr, { zone: TZ });
+    if (dt.isValid) {
+      return { startISO: dt.toISO(), endISO: null };
+    }
+  } catch (e) {
+    // Continue to other formats
+  }
+  
+  // Try common Eventbrite formats
+  const formats = [
+    "LLLL d, yyyy 'at' h:mm a",
+    "LLLL d, yyyy h:mm a",
+    "EEEE, LLLL d, yyyy 'at' h:mm a",
+    "EEEE, LLLL d, yyyy h:mm a"
+  ];
+  
+  for (const format of formats) {
+    try {
+      const dt = DateTime.fromFormat(dateTimeStr, format, { zone: TZ });
+      if (dt.isValid) {
+        return { startISO: dt.toISO(), endISO: null };
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+  
+  return { startISO: null, endISO: null };
+}
+
+export async function scrapeMultipleLinktrees(urls, poshGroups, directUrls = []) {
+  const allEvents = [];
+  const allResults = [];
+  
+  // Create browser context for all scraping
+  const browser = await chromium.launch({
+    headless: false
+  });
+
+  const context = await browser.newContext({
+    viewport: { width: 1920, height: 1080 },
+    userAgent:
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    locale: "en-US",
+    timezoneId: "America/Chicago",
+    deviceScaleFactor: 1,
+    hasTouch: false,
+    isMobile: false,
+    colorScheme: "light"
+  });
+
+  const page = await context.newPage();
+
+  try {
+    // Process Linktree URLs
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`📋 Processing Linktree ${i + 1}/${urls.length}: ${url}`);
+      console.log(`${'='.repeat(60)}\n`);
+      
+      try {
+        const events = await scrapeLinktree(url, page);
+        allEvents.push(...events);
+        allResults.push({
+          sourceUrl: url,
+          sourceType: 'linktree',
+          events: events,
+          count: events.length
+        });
+      } catch (error) {
+        console.error(`❌ Error processing ${url}:`, error.message);
+        allResults.push({
+          sourceUrl: url,
+          sourceType: 'linktree',
+          events: [],
+          count: 0,
+          error: error.message
+        });
+      }
+      
+      // Delay between different Linktree pages
+      if (i < urls.length - 1) {
+        console.log(`\n⏳ Waiting before next Linktree...\n`);
+        await rsleep(3000, 5000);
+      }
+    }
+
+    // Process posh.vip group pages
+    for (let i = 0; i < poshGroups.length; i++) {
+      const url = poshGroups[i];
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`📋 Processing posh.vip group ${i + 1}/${poshGroups.length}: ${url}`);
+      console.log(`${'='.repeat(60)}\n`);
+      
+      try {
+        // Get event links from group page
+        const eventLinks = await scrapePoshGroup(page, url);
+        
+        console.log(`\n🔍 Scraping event details from ${eventLinks.length} posh.vip event pages...\n`);
+        
+        const eventsWithDetails = [];
+        for (let j = 0; j < eventLinks.length; j++) {
+          const link = eventLinks[j];
+          console.log(`[${j + 1}/${eventLinks.length}] Processing: ${link.title}`);
+          
+          const eventDetails = await scrapePoshEvent(page, link.url);
+          
+          // Parse date/time to ISO format
+          const { startISO, endISO } = parsePoshDateTime(eventDetails.dateTime);
+          
+          // Build normalized event
+          const normalized = {
+            title: eventDetails.title || link.title,
+            locationName: eventDetails.venue || null,
+            startTimeLocal: startISO,
+            endTimeLocal: endISO,
+            sourceType: "linktree",
+            sourceOrg: "Linktree Event",
+            sourceUrl: link.url,
+            description: eventDetails.description || null,
+            address: eventDetails.address || null,
+            imageUrl: eventDetails.imageUrl || null
+          };
+          
+          // Extract eventId from URL
+          const urlParts = link.url.split("/").filter(Boolean);
+          const eventId = urlParts[urlParts.length - 1] || link.url;
+          
+          // Always write raw event data (for audit/debug purposes)
+          try {
+            await writeLinktreeRaw(eventId, {
+              eventId,
+              url: link.url,
+              title: link.title,
+              eventDetails: eventDetails,
+              normalized: normalized,
+              scrapedAt: new Date().toISOString()
+            });
+            console.log(`  📝 Raw data saved to events_from_linktree_raw`);
+          } catch (error) {
+            console.error(`  ❌ Error saving raw data: ${error.message}`);
+          }
+          
+          // Check for duplicates before writing normalized event
+          const exists = await eventExists(normalized);
+          if (exists) {
+            console.log(`  ⏭️  Skipping duplicate normalized event`);
+            eventsWithDetails.push({
+              ...link,
+              eventDetails: eventDetails,
+              normalized: normalized,
+              skipped: true,
+              reason: 'duplicate'
+            });
+          } else {
+            // Write normalized event
+            try {
+              await writeNormalizedEvent(normalized, 1.0);
+              console.log(`  ✅ Normalized event saved to Firestore`);
+              eventsWithDetails.push({
+                ...link,
+                eventDetails: eventDetails,
+                normalized: normalized,
+                saved: true
+              });
+            } catch (error) {
+              console.error(`  ❌ Error saving normalized event: ${error.message}`);
+              eventsWithDetails.push({
+                ...link,
+                eventDetails: eventDetails,
+                normalized: normalized,
+                saved: false,
+                error: error.message
+              });
+            }
+          }
+          
+          // Small delay between requests
+          if (j < eventLinks.length - 1) {
+            await rsleep(2000, 3000);
+          }
+        }
+        
+        allEvents.push(...eventsWithDetails);
+        allResults.push({
+          sourceUrl: url,
+          sourceType: 'posh_group',
+          events: eventsWithDetails,
+          count: eventsWithDetails.length
+        });
+      } catch (error) {
+        console.error(`❌ Error processing ${url}:`, error.message);
+        allResults.push({
+          sourceUrl: url,
+          sourceType: 'posh_group',
+          events: [],
+          count: 0,
+          error: error.message
+        });
+      }
+      
+      // Delay between different posh group pages
+      if (i < poshGroups.length - 1) {
+        console.log(`\n⏳ Waiting before next posh.vip group...\n`);
+        await rsleep(3000, 5000);
+      }
+    }
+
+    // Process direct event URLs (Eventbrite and posh.vip)
+    for (let i = 0; i < directUrls.length; i++) {
+      const url = directUrls[i];
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`📋 Processing direct event ${i + 1}/${directUrls.length}: ${url}`);
+      console.log(`${'='.repeat(60)}\n`);
+      
+      try {
+        let eventDetails = null;
+        let normalized = null;
+        
+        if (url.includes('eventbrite.com')) {
+          eventDetails = await scrapeEventbrite(page, url);
+          
+          // Parse date/time
+          const { startISO, endISO } = parseEventbriteDateTime(eventDetails.dateTime);
+          
+          // Build normalized event
+          normalized = {
+            title: eventDetails.title,
+            locationName: eventDetails.venue || null,
+            startTimeLocal: startISO,
+            endTimeLocal: endISO,
+            sourceType: "eventbrite",
+            sourceOrg: "Eventbrite",
+            sourceUrl: url,
+            description: eventDetails.description || null,
+            address: eventDetails.address || null,
+            imageUrl: eventDetails.imageUrl || null
+          };
+        } else if (url.includes('posh.vip')) {
+          eventDetails = await scrapePoshEvent(page, url);
+          
+          // Parse date/time
+          const { startISO, endISO } = parsePoshDateTime(eventDetails.dateTime);
+          
+          // Build normalized event
+          normalized = {
+            title: eventDetails.title,
+            locationName: eventDetails.venue || null,
+            startTimeLocal: startISO,
+            endTimeLocal: endISO,
+            sourceType: "linktree",
+            sourceOrg: "Linktree Event",
+            sourceUrl: url,
+            description: eventDetails.description || null,
+            address: eventDetails.address || null,
+            imageUrl: eventDetails.imageUrl || null
+          };
+        }
+        
+        if (normalized && normalized.title) {
+          // Extract eventId from URL
+          const urlParts = url.split("/").filter(Boolean);
+          const eventId = urlParts[urlParts.length - 1] || url;
+          
+          // Always write raw event data (for audit/debug purposes)
+          try {
+            await writeLinktreeRaw(eventId, {
+              eventId,
+              url: url,
+              eventDetails: eventDetails,
+              normalized: normalized,
+              scrapedAt: new Date().toISOString()
+            });
+            console.log(`  📝 Raw data saved to events_from_linktree_raw`);
+          } catch (error) {
+            console.error(`  ❌ Error saving raw data: ${error.message}`);
+          }
+          
+          // Check for duplicates before writing normalized event
+          const exists = await eventExists(normalized);
+          if (exists) {
+            console.log(`  ⏭️  Skipping duplicate normalized event`);
+            allEvents.push({
+              url: url,
+              eventDetails: eventDetails,
+              normalized: normalized,
+              skipped: true,
+              reason: 'duplicate'
+            });
+          } else {
+            // Write normalized event
+            try {
+              await writeNormalizedEvent(normalized, 1.0);
+              console.log(`  ✅ Normalized event saved to Firestore`);
+              allEvents.push({
+                url: url,
+                eventDetails: eventDetails,
+                normalized: normalized,
+                saved: true
+              });
+            } catch (error) {
+              console.error(`  ❌ Error saving normalized event: ${error.message}`);
+              allEvents.push({
+                url: url,
+                eventDetails: eventDetails,
+                normalized: normalized,
+                saved: false,
+                error: error.message
+              });
+            }
+          }
+        } else {
+          console.log(`  ⏭️  Skipping - no valid event data`);
+          allEvents.push({
+            url: url,
+            eventDetails: eventDetails,
+            skipped: true,
+            reason: 'no_data'
+          });
+        }
+        
+        allResults.push({
+          sourceUrl: url,
+          sourceType: url.includes('eventbrite.com') ? 'eventbrite' : 'posh_direct',
+          events: [allEvents[allEvents.length - 1]],
+          count: 1
+        });
+      } catch (error) {
+        console.error(`❌ Error processing ${url}:`, error.message);
+        allResults.push({
+          sourceUrl: url,
+          sourceType: 'direct',
+          events: [],
+          count: 0,
+          error: error.message
+        });
+      }
+      
+      // Delay between different direct event pages
+      if (i < directUrls.length - 1) {
+        console.log(`\n⏳ Waiting before next direct event...\n`);
+        await rsleep(2000, 3000);
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+  
+  // Save combined results
+  const outputFile = `linktree_scrape_${new Date().toISOString().split('T')[0]}.json`;
+  const outputData = {
+    scrapedAt: new Date().toISOString(),
+    linktreeUrls: urls,
+    poshGroupUrls: poshGroups,
+    directEventUrls: directUrls,
+    totalSources: urls.length + poshGroups.length + directUrls.length,
+    totalEvents: allEvents.length,
+    sources: allResults,
+    allEvents: allEvents
+  };
+
+  writeFileSync(outputFile, JSON.stringify(outputData, null, 2), "utf8");
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`💾 Saved combined results to ${outputFile}`);
+  console.log(`${'='.repeat(60)}`);
+  
+  return allEvents;
+}
+
+scrapeMultipleLinktrees(LINKTREE_URLS, POSH_GROUP_URLS, DIRECT_EVENT_URLS)
   .then((events) => {
-    const poshEvents = events.filter(e => e.url.includes('posh.vip'));
+    const poshEvents = events.filter(e => e.url && e.url.includes('posh.vip'));
     console.log(`\n✨ Scraping complete!`);
+    console.log(`   - Processed ${LINKTREE_URLS.length} Linktree pages`);
+    console.log(`   - Processed ${POSH_GROUP_URLS.length} posh.vip group pages`);
     console.log(`   - Found ${events.length} total events`);
     console.log(`   - Scraped ${poshEvents.length} posh.vip event pages`);
     process.exit(0);

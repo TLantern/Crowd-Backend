@@ -75,6 +75,22 @@ export async function writeEngageRaw(eventId, payload) {
     );
 }
 
+// Write raw Linktree scrape payload (debug / audit)
+export async function writeLinktreeRaw(eventId, payload) {
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  await db
+    .collection("events_from_linktree_raw")
+    .doc(eventId)
+    .set(
+      {
+        ...payload,
+        createdAt: now,
+        lastSeenAt: now
+      },
+      { merge: true }
+    );
+}
+
 // Upsert normalized "live" event (shared across sources)
 export async function writeNormalizedEvent(normalized, confidenceOverride) {
   const id = canonicalIdForEvent(normalized);
