@@ -10,6 +10,7 @@
     "linktree:daily": "node linktree_daily_pipeline.js",
     "linktree:cleanup": "node cleanup_duplicates_and_past.js",
     "linktree:cleanup-now": "node cleanup_now.js",
+    "cleanup:all": "node cleanup_all_past_events.js",
     "fetch:official": "node fetch_official.js",
     "fetch:engage": "node fetch_engage.js",
     "cleanup": "node cleanup.js",
