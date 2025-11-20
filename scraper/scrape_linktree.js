@@ -190,7 +190,9 @@ async function scrapePoshEvent(page, url) {
         description: null,
         address: null,
         imageUrl: null,
-        additionalInfo: []
+        additionalInfo: [],
+        images: [],
+        primaryImage: null
       };
 
       // Try to find title - usually in h1 or large heading
@@ -452,6 +454,163 @@ async function scrapePoshEvent(page, url) {
         }
       }
 
+      // ====== IMAGE EXTRACTION ======
+      const imageData = [];
+      const seenImageUrls = new Set();
+
+      // Helper to parse Cloudflare CDN URLs
+      const parseImageUrl = (url) => {
+        if (!url) return null;
+        
+        // Cloudflare CDN format: https://posh.vip/cdn-cgi/image/width=X,height=Y,.../https://original-url
+        const cfMatch = url.match(/cdn-cgi\/image\/[^\/]*\/(https?:\/\/.+)/);
+        if (cfMatch) {
+          const originalUrl = cfMatch[1];
+          const widthMatch = url.match(/width=(\d+)/);
+          const heightMatch = url.match(/height=(\d+)/);
+          
+          return {
+            url: url,
+            originalUrl: originalUrl,
+            width: widthMatch ? parseInt(widthMatch[1]) : null,
+            height: heightMatch ? parseInt(heightMatch[1]) : null
+          };
+        }
+        
+        return { url: url, originalUrl: url, width: null, height: null };
+      };
+
+      // 1. Extract from Open Graph meta tags
+      const ogImages = document.querySelectorAll('meta[property="og:image"]');
+      for (const meta of ogImages) {
+        const content = meta.getAttribute('content');
+        if (content && !seenImageUrls.has(content)) {
+          const parsed = parseImageUrl(content);
+          if (parsed) {
+            imageData.push({
+              url: parsed.url,
+              originalUrl: parsed.originalUrl,
+              source: 'og:image',
+              width: parsed.width,
+              height: parsed.height
+            });
+            seenImageUrls.add(content);
+            seenImageUrls.add(parsed.originalUrl);
+          }
+        }
+      }
+
+      // 2. Extract from JSON-LD structured data (schema.org)
+      const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      for (const script of jsonLdScripts) {
+        try {
+          const json = JSON.parse(script.textContent);
+          
+          // Handle single object or array
+          const items = Array.isArray(json) ? json : [json];
+          
+          for (const item of items) {
+            if (item['@type'] === 'Event' && item.image) {
+              // Image can be a string, array, or object
+              const images = Array.isArray(item.image) ? item.image : [item.image];
+              
+              for (const img of images) {
+                const imgUrl = typeof img === 'string' ? img : img.url || img['@id'];
+                if (imgUrl && !seenImageUrls.has(imgUrl)) {
+                  const parsed = parseImageUrl(imgUrl);
+                  if (parsed) {
+                    imageData.push({
+                      url: parsed.url,
+                      originalUrl: parsed.originalUrl,
+                      source: 'schema.org',
+                      width: parsed.width || img.width,
+                      height: parsed.height || img.height
+                    });
+                    seenImageUrls.add(imgUrl);
+                    seenImageUrls.add(parsed.originalUrl);
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+
+      // 3. Extract from img tags (event posters/banners)
+      const imgTags = document.querySelectorAll('img[src]');
+      for (const img of imgTags) {
+        const src = img.src || img.getAttribute('src');
+        // Filter for relevant images (usually larger event images)
+        if (src && 
+            !src.includes('logo') && 
+            !src.includes('icon') && 
+            !src.includes('avatar') &&
+            !seenImageUrls.has(src)) {
+          
+          const parsed = parseImageUrl(src);
+          if (parsed) {
+            imageData.push({
+              url: parsed.url,
+              originalUrl: parsed.originalUrl,
+              source: 'img',
+              width: parsed.width || img.naturalWidth || null,
+              height: parsed.height || img.naturalHeight || null
+            });
+            seenImageUrls.add(src);
+            seenImageUrls.add(parsed.originalUrl);
+          }
+        }
+      }
+
+      // Deduplicate by originalUrl (same image at different sizes)
+      const imagesByOriginal = new Map();
+      for (const img of imageData) {
+        const key = img.originalUrl;
+        if (!imagesByOriginal.has(key)) {
+          imagesByOriginal.set(key, []);
+        }
+        imagesByOriginal.get(key).push(img);
+      }
+
+      // For each unique image, keep the highest quality version
+      const deduplicatedImages = [];
+      for (const [originalUrl, versions] of imagesByOriginal.entries()) {
+        // Sort by dimensions (prefer larger images)
+        versions.sort((a, b) => {
+          const aSize = (a.width || 0) * (a.height || 0);
+          const bSize = (b.width || 0) * (b.height || 0);
+          return bSize - aSize; // Descending order
+        });
+        
+        // Keep the largest version
+        const best = versions[0];
+        deduplicatedImages.push({
+          url: best.url,
+          originalUrl: best.originalUrl,
+          source: best.source,
+          width: best.width,
+          height: best.height
+        });
+      }
+
+      // Sort by priority: schema.org > og:image > img
+      const sourcePriority = { 'schema.org': 3, 'og:image': 2, 'img': 1 };
+      deduplicatedImages.sort((a, b) => {
+        const aPriority = sourcePriority[a.source] || 0;
+        const bPriority = sourcePriority[b.source] || 0;
+        if (aPriority !== bPriority) return bPriority - aPriority;
+        
+        // If same priority, prefer larger images
+        const aSize = (a.width || 0) * (a.height || 0);
+        const bSize = (b.width || 0) * (b.height || 0);
+        return bSize - aSize;
+      });
+
+      data.images = deduplicatedImages;
+      data.primaryImage = deduplicatedImages.length > 0 ? deduplicatedImages[0].url : null;
+
       return data;
     });
 
@@ -493,6 +652,10 @@ async function scrapePoshEvent(page, url) {
     console.log(`  ✓ Venue: ${eventData.venue || 'Not found'}`);
     console.log(`  ✓ Date/Time: ${eventData.dateTime || 'Not found'}`);
     console.log(`  ✓ Image: ${eventData.imageUrl || 'Not found'}`);
+    console.log(`  ✓ Images: ${eventData.images.length} found`);
+    if (eventData.primaryImage) {
+      console.log(`  ✓ Primary Image: ${eventData.primaryImage.substring(0, 80)}...`);
+    }
     
     return eventData;
 
@@ -506,6 +669,8 @@ async function scrapePoshEvent(page, url) {
       address: null,
       imageUrl: null,
       additionalInfo: [],
+      images: [],
+      primaryImage: null,
       error: error.message
     };
   }

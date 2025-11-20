@@ -3,13 +3,16 @@
     "version": "1.0.0",
     "description": "Ingest Instagram org posts and official UNT calendar events into Firestore for the next-14-days campus events feed.",
     "type": "module",
-    "scripts": {
-      "scrape:ig": "node scrape_instagram.js",
-      "fetch:official": "node fetch_official.js",
-      "fetch:engage": "node fetch_engage.js",
-      "cleanup": "node cleanup.js",
-      "clear:campus": "node clear_campus_events.js"
-    },
+  "scripts": {
+    "scrape:ig": "node scrape_instagram.js",
+    "scrape:linktree": "node scrape_linktree.js",
+    "upload:linktree": "node upload_linktree_to_firebase.js",
+    "linktree:daily": "node linktree_daily_pipeline.js",
+    "fetch:official": "node fetch_official.js",
+    "fetch:engage": "node fetch_engage.js",
+    "cleanup": "node cleanup.js",
+    "clear:campus": "node clear_campus_events.js"
+  },
     "dependencies": {
       "@playwright/test": "^1.48.0",
       "firebase-admin": "^12.6.0",
