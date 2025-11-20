@@ -438,6 +438,12 @@ async function scrapePoshEvent(page, url) {
           }
         }
       }
+      
+      // Set primaryImage from imageUrl for compatibility
+      if (data.imageUrl) {
+        data.primaryImage = data.imageUrl;
+        data.images = [data.imageUrl];
+      }
 
       // Collect additional info lines
       const infoKeywords = [
@@ -610,6 +616,8 @@ async function scrapePoshEvent(page, url) {
 
       data.images = deduplicatedImages;
       data.primaryImage = deduplicatedImages.length > 0 ? deduplicatedImages[0].url : null;
+      // Set imageUrl from primaryImage for backward compatibility
+      data.imageUrl = data.primaryImage;
 
       return data;
     });
